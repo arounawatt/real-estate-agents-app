@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "conversations_contact_profile_idx" ON "conversations" USING btree ("tenant_id","contact_id","profile");

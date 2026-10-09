@@ -1,0 +1,21 @@
+{
+  "agency": {
+    "name": "Keur Immo",
+    "plan": "essential",
+    "listingDomains": ["keurimmo.sn"],
+    "bookingUrlRental": "https://calendly.com/keurimmo/visite",
+    "bookingUrlSale": null,
+    "splitBookingLinks": false,
+    "disclosureLevel": "neighbourhood",
+    "emergencyNumbers": []
+  },
+  "admins": [
+    { "fullName": "Awa Diop", "phone": "+221 77 123 45 67", "dashboardAccess": true },
+    { "fullName": "Moussa Ndiaye", "phone": "+33 6 12 34 56 78", "dashboardAccess": false }
+  ],
+  "whatsapp": {
+    "wabaId": "123456789012345",
+    "phoneNumberId": "109876543210987",
+    "accessToken": "EAAG…"
+  }
+}

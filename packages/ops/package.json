@@ -1,0 +1,25 @@
+{
+  "name": "@codaya/ops",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "user": "tsx src/user.ts",
+    "tenant": "tsx src/tenant.ts",
+    "tenant-status": "tsx src/tenant-status.ts",
+    "whatsapp": "tsx src/whatsapp.ts",
+    "whatsapp-token": "tsx src/whatsapp-token.ts",
+    "onboard": "tsx src/onboard.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@codaya/db": "workspace:*",
+    "@codaya/whatsapp": "workspace:*",
+    "drizzle-orm": "^0.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

@@ -1,0 +1,1603 @@
+<title>Bunt — Tableau de bord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --brand:#1E4D3B;--brand-hi:#2A6B51;--brand-soft:#1E4D3B14;
+  --accent:#A8742A;--accent-soft:#A8742A18;
+  --third:#3C6076;--third-soft:#3C607618;
+  --ink:#13170F;--ink-2:#4E5449;--ink-3:#82887A;
+  --line:#E2DDD1;--line-2:#EDE9E0;
+  --bg:#F7F4EE;--surface:#FFFFFF;--surface-2:#F0ECE3;
+  --pos:#2C7450;--pos-soft:#2C745014;--neg:#A8452D;--neg-soft:#A8452D14;
+  --grid:#E8E3D8;
+  --display:"Instrument Serif",Georgia,serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;
+  --r:8px;--r-lg:14px;--r-full:100px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --shadow:0 1px 2px rgba(19,23,15,.04),0 6px 20px -10px rgba(19,23,15,.12);
+}
+:root:not([data-theme="light"]){@media(prefers-color-scheme:dark){
+  --brand:#4E9C77;--brand-hi:#63B48C;--brand-soft:#4E9C7722;
+  --accent:#CF9C4E;--accent-soft:#CF9C4E22;
+  --third:#7BA7C0;--third-soft:#7BA7C022;
+  --ink:#F2EDE3;--ink-2:#A9A294;--ink-3:#7A7469;
+  --line:#2E2A23;--line-2:#262219;
+  --bg:#131109;--surface:#1B1811;--surface-2:#221E16;
+  --pos:#5AA87D;--pos-soft:#5AA87D1F;--neg:#C9705A;--neg-soft:#C9705A1F;
+  --grid:#2A261F;--shadow:0 1px 2px rgba(0,0,0,.5),0 6px 20px -10px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --brand:#4E9C77;--brand-hi:#63B48C;--brand-soft:#4E9C7722;
+  --accent:#CF9C4E;--accent-soft:#CF9C4E22;
+  --third:#7BA7C0;--third-soft:#7BA7C022;
+  --ink:#F2EDE3;--ink-2:#A9A294;--ink-3:#7A7469;
+  --line:#2E2A23;--line-2:#262219;
+  --bg:#131109;--surface:#1B1811;--surface-2:#221E16;
+  --pos:#5AA87D;--pos-soft:#5AA87D1F;--neg:#C9705A;--neg-soft:#C9705A1F;
+  --grid:#2A261F;--shadow:0 1px 2px rgba(0,0,0,.5),0 6px 20px -10px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit}
+a{color:inherit}
+.micro{font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.shell{display:flex;min-height:100vh}
+
+/* NAV */
+.side{width:252px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s5);position:sticky;top:0;height:100vh;overflow-y:auto}
+@media(max-width:1023px){.side{position:fixed;inset:0 auto 0 0;z-index:80;height:100dvh;transform:translateX(-102%);transition:transform .3s var(--ease);box-shadow:0 0 40px rgba(0,0,0,.18)}.side.open{transform:none}}
+.scrim{position:fixed;inset:0;background:rgba(19,23,15,.42);z-index:79;opacity:0;pointer-events:none;transition:opacity .28s var(--ease)}
+.scrim.on{opacity:1;pointer-events:auto}
+@media(min-width:1024px){.scrim{display:none}}
+.brandblock{display:flex;align-items:center;gap:10px}
+.brandmark{width:38px;height:38px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:var(--display);font-size:21px;flex:none}
+.brandname{font-size:15px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.brandsub{font-size:11.5px;color:var(--ink-3)}
+.closebtn{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;cursor:pointer;display:grid;place-items:center}
+@media(min-width:1024px){.closebtn{display:none}}
+.closebtn svg{width:15px;height:15px}
+.navgroup{display:flex;flex-direction:column;gap:2px}
+.navtitle{display:flex;align-items:center;justify-content:space-between;padding:0 var(--s3) var(--s2);font-size:12px;font-weight:600;color:var(--ink-2)}
+.nav{display:flex;align-items:center;gap:10px;padding:9px var(--s3);border-radius:var(--r);border:none;background:transparent;width:100%;cursor:pointer;text-align:left;font-size:13.5px;color:var(--ink-2);transition:background-color .18s var(--ease),color .18s var(--ease)}
+.nav:hover{background:var(--surface-2)}
+.nav.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.nav svg{width:17px;height:17px;flex:none}
+.nav .count{margin-left:auto;font-size:12px;color:var(--ink-3);font-weight:500}
+.nav.on .count{color:var(--brand)}
+.nav:disabled{opacity:.5;cursor:default}
+.mono{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;letter-spacing:-.02em;position:relative}
+.mono::after{content:"";position:absolute;inset:-2.5px;border-radius:50%;border:1.5px solid currentColor;opacity:.45}
+.mono.c1{background:var(--brand-soft);color:var(--brand)}
+.mono.c2{background:var(--accent-soft);color:var(--accent)}
+.mono.c3{background:var(--surface-2);color:var(--ink-3)}
+.mono.c4{background:var(--third-soft);color:var(--third)}
+.dotstatus{position:absolute;right:-1px;bottom:-1px;width:8px;height:8px;border-radius:50%;background:var(--pos);border:2px solid var(--surface)}
+.side-foot{margin-top:auto}
+
+/* MAIN */
+.main{flex:1;min-width:0;display:flex;gap:var(--s5);padding:var(--s4);align-items:flex-start}
+@media(min-width:700px){.main{padding:var(--s6)}}
+@media(max-width:1319px){.main{flex-direction:column;gap:var(--s5)}}
+.center{flex:1;min-width:0;width:100%}
+.rightcol{width:300px;flex:none;position:sticky;top:var(--s6)}
+@media(max-width:1319px){.rightcol{width:100%;position:static;order:-1}}
+.mtop{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s5)}
+@media(min-width:1024px){.mtop{display:none}}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;flex:none}
+.iconbtn:hover{color:var(--ink);border-color:var(--ink-3)}
+.iconbtn svg{width:17px;height:17px}
+
+/* ROSTER */
+.roster{display:flex;gap:var(--s5);overflow-x:auto;padding:7px 0 var(--s3);margin-bottom:var(--s6)}
+.rost{display:flex;flex-direction:column;align-items:center;gap:8px;flex:none;background:none;border:none;cursor:pointer;padding:0;width:96px}
+.rost-av{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;position:relative;font-family:var(--display);font-size:26px;transition:transform .25s var(--ease)}
+.rost:hover .rost-av{transform:translateY(-2px)}
+.rost-av::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid currentColor;opacity:.38}
+.rost-av.c1{background:var(--brand-soft);color:var(--brand)}
+.rost-av.c2{background:var(--accent-soft);color:var(--accent)}
+.rost-av.c4{background:var(--third-soft);color:var(--third)}
+.rost-av.soon{background:transparent;color:var(--ink-3);border:1.5px dashed var(--line)}
+.rost-av.soon::after{display:none}
+.rost-n{font-size:13px;font-weight:600;line-height:1.25}
+.rost-r{font-size:10.5px;color:var(--ink-3);line-height:1.3}
+.rost.soon .rost-n{color:var(--ink-3);font-weight:500}
+
+h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,4vw,34px);line-height:1.1;letter-spacing:-.015em}
+h2{font-size:17px;font-weight:700;letter-spacing:-.02em;margin-bottom:var(--s4)}
+h3{font-size:14px;font-weight:600;letter-spacing:-.01em}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--s3);margin-bottom:var(--s6)}
+.kpi{position:relative;overflow:hidden;background:var(--brand);color:#fff;border-radius:var(--r-lg);padding:var(--s4) var(--s4) var(--s5)}
+.kpi .arc{position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;border:16px solid rgba(255,255,255,.16);border-right-color:transparent;border-bottom-color:transparent;transform:rotate(35deg)}
+.kpi-k{font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;opacity:.82;position:relative}
+.kpi-v{font-family:var(--display);font-size:38px;line-height:1.05;margin-top:var(--s3);position:relative}
+.kpi-v small{font-family:var(--sans);font-size:15px;font-weight:400;opacity:.8}
+.kpi-n{font-size:12px;opacity:.78;margin-top:4px;position:relative}
+
+/* CARTES */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+/* la carte d'actions ne doit pas découper les infobulles */
+.card.acts{overflow:visible}
+.card+.card{margin-top:var(--s4)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s4);flex-wrap:wrap}
+.card-hd h3{margin:0}
+.link{font-size:12.5px;color:var(--brand);font-weight:600;background:none;border:none;cursor:pointer;padding:0}
+.link:hover{text-decoration:underline}
+.grid2{display:grid;gap:var(--s4);margin-bottom:var(--s6)}
+@media(min-width:900px){.grid2{grid-template-columns:1.55fr 1fr}}
+
+/* GRAPHE */
+.chartwrap{padding:0 var(--s4) var(--s4);position:relative}
+.chartsvg{width:100%;height:190px;display:block;overflow:visible}
+.gridline{stroke:var(--grid);stroke-width:1}
+.axis-t{fill:var(--ink-3);font-size:10.5px;font-family:var(--sans)}
+.serie{fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.serie-fill{fill:var(--brand);opacity:.08}
+.pt{fill:var(--surface);stroke:var(--brand);stroke-width:2}
+.pt-last{fill:var(--brand);stroke:var(--surface);stroke-width:2}
+.crosshair{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 3;opacity:0;transition:opacity .12s}
+.hitzone{fill:transparent;cursor:crosshair}
+.dlabel{fill:var(--ink);font-size:11.5px;font-weight:600;font-family:var(--sans)}
+.tip{position:absolute;pointer-events:none;opacity:0;transform:translate(-50%,-118%);background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:7px;font-size:12px;white-space:nowrap;transition:opacity .12s;z-index:5}
+.measured{display:flex;align-items:flex-start;gap:9px;margin:0 var(--s4) var(--s4);padding:var(--s3);border-radius:var(--r);background:var(--surface-2);font-size:12px;color:var(--ink-2);line-height:1.5}
+.measured svg{width:14px;height:14px;flex:none;margin-top:2px;color:var(--ink-3)}
+.measured b{color:var(--ink);font-weight:600}
+
+/* BARRES */
+.split{padding:0 var(--s4) var(--s4);display:flex;flex-direction:column;gap:var(--s4)}
+.sp-row{display:flex;align-items:center;gap:var(--s3)}
+.sp-bar{flex:1;height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.sp-fill{height:100%;border-radius:4px}
+.sp-n{font-size:13px;font-weight:500;width:84px;flex:none}
+.sp-v{font-size:13px;font-weight:600;width:48px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+
+/* LIGNES */
+.row{display:flex;gap:var(--s3);padding:var(--s4);border:none;border-top:1px solid var(--line-2);background:none;cursor:pointer;transition:background-color .16s var(--ease);width:100%;text-align:left;align-items:flex-start}
+.row:hover{background:var(--surface-2)}
+.row-body{flex:1;min-width:0}
+.row-l1{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+.row-name{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.row-phone{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;height:19px;padding:0 7px;border-radius:5px;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;line-height:1}
+.badge.dia{color:var(--accent);background:var(--accent-soft)}
+.badge.urg{color:var(--neg);background:var(--neg-soft)}
+.badge.ok{color:var(--pos);background:var(--pos-soft)}
+.badge.nt{color:var(--ink-3);background:var(--surface-2)}
+.row-time{margin-left:auto;font-size:11.5px;color:var(--ink-3);white-space:nowrap;flex:none;display:flex;align-items:center;gap:var(--s3)}
+.row-msg{font-size:13px;color:var(--ink-2);font-weight:300;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:var(--r-full);background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);font-size:11.5px;line-height:1;white-space:nowrap}
+.chip b{font-weight:600;color:var(--ink)}
+.chip.hot{background:var(--brand-soft);border-color:transparent;color:var(--brand);font-weight:600}
+.score{font-family:var(--display);font-size:19px;color:var(--brand);line-height:1}
+.empty{padding:var(--s6) var(--s4);text-align:center;color:var(--ink-3);font-size:13px}
+
+/* BARRE D'OUTILS */
+.toolbar{display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap;padding:0 var(--s4) var(--s4)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{padding:6px 11px;font-size:12.5px;background:transparent;border:none;cursor:pointer;color:var(--ink-2);border-left:1px solid var(--line)}
+.seg button:first-child{border-left:none}
+.seg button.on{background:var(--brand-soft);color:var(--brand);font-weight:600}
+.tbl{font-size:12px;color:var(--ink-3);margin-right:2px}
+
+/* PAGINATION */
+.pager{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s4);border-top:1px solid var(--line-2);flex-wrap:wrap}
+.pager-i{font-size:12.5px;color:var(--ink-3)}
+.pager-b{display:flex;gap:var(--s2)}
+.pbtn{width:34px;height:34px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink-2)}
+.pbtn:hover:not(:disabled){border-color:var(--ink-3);color:var(--ink)}
+.pbtn:disabled{opacity:.35;cursor:default}
+.pbtn svg{width:15px;height:15px}
+
+/* PANNEAU DROIT */
+.greet{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--shadow)}
+.greet h2{font-family:var(--display);font-weight:400;font-size:24px;margin-bottom:2px}
+.greet .d{font-size:12.5px;color:var(--ink-3)}
+.nowlist{margin-top:var(--s5)}
+.nowitem{display:flex;gap:10px;padding:var(--s3) 0;border-top:1px solid var(--line-2);font-size:12.5px;color:var(--ink-2);width:100%;text-align:left;background:none;border-left:none;border-right:none;border-bottom:none;cursor:pointer}
+.nowitem:first-of-type{border-top:none}
+.nowitem:hover{color:var(--ink)}
+.nowitem b{font-weight:600;color:var(--ink)}
+.pulse{width:7px;height:7px;border-radius:50%;flex:none;margin-top:6px;position:relative}
+.pulse.an::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid currentColor;opacity:.5;animation:ping 2.4s var(--ease) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.6}70%,100%{transform:scale(1.8);opacity:0}}
+
+/* VUES */
+.view{display:none}.view.on{display:block}
+.back{display:inline-flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:var(--ink-3);font-size:12.5px;padding:0;margin-bottom:var(--s4)}
+.back:hover{color:var(--ink)}
+.back svg{width:14px;height:14px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s5);flex-wrap:wrap}
+.agenthero{display:flex;gap:var(--s5);align-items:flex-start;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--shadow);margin-bottom:var(--s5)}
+.agenthero .big{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:36px;position:relative;flex:none}
+.agenthero .big::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid currentColor;opacity:.35}
+.ah-body{flex:1;min-width:220px}
+.ah-name{font-family:var(--display);font-size:32px;line-height:1.1}
+.ah-role{font-size:13px;color:var(--ink-3);margin-bottom:var(--s3)}
+.ah-desc{font-size:14px;color:var(--ink-2);font-weight:300;max-width:56ch}
+.ah-stats{display:flex;gap:var(--s5);margin-top:var(--s4);flex-wrap:wrap;font-size:12.5px;color:var(--ink-3)}
+.ah-stats b{color:var(--ink);font-weight:600}
+
+/* DÉTAIL */
+.dd-top{display:flex;gap:var(--s4);align-items:flex-start;flex-wrap:wrap;margin-bottom:var(--s5)}
+.dd-ref{font-family:var(--display);font-size:28px;line-height:1.15}
+.dd-sub{font-size:13px;color:var(--ink-2);margin-top:3px}
+.telbtn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--brand);text-decoration:none;margin-top:6px;font-variant-numeric:tabular-nums}
+.telbtn:hover{text-decoration:underline}
+.telbtn svg{width:14px;height:14px}
+.dd-grid{display:grid;gap:var(--s4)}
+@media(min-width:960px){.dd-grid{grid-template-columns:1.5fr 1fr;align-items:start}}
+.thread{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s4);max-height:540px;overflow-y:auto;scroll-behavior:smooth}
+.thread::-webkit-scrollbar{width:6px}
+.thread::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.older{align-self:center;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-full);padding:5px 13px;font-size:12px;color:var(--ink-2);cursor:pointer}
+.older:hover{border-color:var(--ink-3);color:var(--ink)}
+.msg{display:flex;max-width:88%}
+.msg.out{margin-left:auto}
+.msg-b{padding:10px 13px;border-radius:13px;font-size:13.5px;line-height:1.5}
+.msg.in .msg-b{background:var(--surface-2);border-bottom-left-radius:4px}
+.msg.out .msg-b{background:var(--accent-soft);border-bottom-right-radius:4px}
+.msg-t{font-size:10.5px;color:var(--ink-3);margin-top:5px}
+.msg.out .msg-t{text-align:right}
+.photos{display:flex;gap:7px;margin-top:9px}
+.ph{width:64px;height:64px;border-radius:8px;background:linear-gradient(150deg,#C9B294,#6E6A5C);position:relative;overflow:hidden}
+.ph::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,rgba(255,255,255,.22),transparent 55%)}
+.ph.b{background:linear-gradient(170deg,#9FB4B0,#3E4B4A)}
+.kv{display:flex;justify-content:space-between;gap:var(--s4);padding:11px var(--s4);border-top:1px solid var(--line-2);font-size:13px}
+.kv:first-of-type{border-top:none}
+.kv-k{color:var(--ink-3);flex:none}
+.kv-v{font-weight:500;text-align:right}
+.actions{display:flex;gap:var(--s2);padding:var(--s4);flex-wrap:wrap}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+@media(max-width:560px){.formgrid{grid-template-columns:1fr}}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld span{font-size:11.5px;color:var(--ink-3);font-weight:500}
+.fld input,.fld select{height:38px;padding:0 11px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:13.5px}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--brand)}
+.fld input[type=date]{min-height:38px;-webkit-appearance:none;appearance:none}
+.pubsw{display:inline-flex;gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.pubsw button{height:40px;padding:0 20px;border:0;background:transparent;color:var(--ink-3);font-family:var(--sans);font-size:13.5px;font-weight:500;cursor:pointer}
+.pubsw button.on{background:var(--brand);color:#fff;font-weight:600}
+@media(max-width:560px){.pubsw{width:100%}.pubsw button{flex:1}}
+.safety{display:flex;gap:var(--s3);align-items:flex-start;background:var(--neg-soft);border:1px solid var(--neg);border-radius:var(--r-lg);padding:var(--s4);margin-bottom:var(--s4);font-size:13px;color:var(--ink-2);line-height:1.55}
+.safety svg{width:19px;height:19px;flex:none;color:var(--neg);margin-top:1px}
+.safety b{color:var(--neg)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 15px;border-radius:var(--r);border:1px solid transparent;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none}
+.btn svg{width:15px;height:15px}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:hover{background:var(--brand-hi)}
+.btn-g{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn-g:hover{border-color:var(--ink-3)}
+
+/* TOOLTIP DE TEMPLATE */
+.tw{position:relative;display:inline-flex}
+.tt{
+  position:absolute;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%) translateY(4px);
+  width:290px;background:var(--ink);color:var(--bg);padding:11px 13px;border-radius:10px;
+  font-size:12px;line-height:1.5;font-weight:400;opacity:0;pointer-events:none;
+  transition:opacity .16s var(--ease),transform .16s var(--ease);z-index:200;text-align:left;
+}
+.tw:hover{z-index:201}
+.tw:hover .tt,.tw:focus-within .tt{opacity:1;transform:translateX(-50%)}
+.tt::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--ink)}
+.tt .tt-k{font-size:10px;letter-spacing:.09em;text-transform:uppercase;opacity:.65;display:block;margin-bottom:5px}
+.tt .tt-m{background:rgba(255,255,255,.1);padding:8px 10px;border-radius:7px;font-style:italic;display:block}
+</style>
+
+<div class="scrim" id="scrim"></div>
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="brandblock">
+      <div class="brandmark">B</div>
+      <div><div class="brandname">Bunt</div><div class="brandsub">Résidences Atlantique</div></div>
+      <button class="closebtn" id="closeNav" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="navgroup">
+      <button class="nav on" data-go="dash"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg> Tableau de bord</button>
+    </div>
+    <div class="navgroup">
+      <div class="navtitle">Activité</div>
+      <button class="nav" data-go="conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5Z"/></svg> Conversations <span class="count" id="cCon"></span></button>
+      <button class="nav" data-go="leads"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Leads <span class="count" id="cLead"></span></button>
+      <button class="nav" data-go="visites"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Visites <span class="count" id="cVis"></span></button>
+      <button class="nav" data-go="dossiers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14.7 6.3 3 3M3 21l3.5-.7L20 6.8a2 2 0 0 0 0-2.8l-.9-.9a2 2 0 0 0-2.8 0L2.8 16.6 3 21Z"/></svg> Dossiers <span class="count" id="cDos"></span></button>
+      <button class="nav" data-go="biens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z"/><path d="M9 22v-7h6v7"/></svg> Nos biens <span class="count" id="cBien"></span></button>
+    </div>
+    <div class="navgroup">
+      <div class="navtitle">Mes agents</div>
+      <button class="nav" data-go="coumba"><span class="mono c1">C<span class="dotstatus"></span></span> Coumba</button>
+      <button class="nav" data-go="malick"><span class="mono c2">M<span class="dotstatus"></span></span> Malick</button>
+      <button class="nav" data-go="amadou"><span class="mono c4">A<span class="dotstatus"></span></span> Amadou</button>
+      <button class="nav" disabled><span class="mono c3">S</span> Sokhna <span class="count">bientôt</span></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="center">
+      <div class="mtop">
+        <button class="iconbtn" id="openNav" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div style="flex:1;min-width:0"><div class="brandname" style="font-size:14px">Bunt</div><div class="brandsub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Résidences Atlantique</div></div>
+        <button class="iconbtn theme" aria-label="Thème"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+      </div>
+
+      <section class="view on" id="v-dash">
+        <div class="roster">
+          <button class="rost" data-go="coumba"><span class="rost-av c1">C</span><span class="rost-n">Coumba</span><span class="rost-r">Chargée de clientèle</span></button>
+          <button class="rost" data-go="malick"><span class="rost-av c2">M</span><span class="rost-n">Malick</span><span class="rost-r">Régisseur</span></button>
+          <button class="rost" data-go="amadou"><span class="rost-av c4">A</span><span class="rost-n">Amadou</span><span class="rost-r">Agent catalogue</span></button>
+          <button class="rost soon"><span class="rost-av soon">S</span><span class="rost-n">Sokhna</span><span class="rost-r">Prospectrice · bientôt</span></button>
+        </div>
+        <div class="pagehead"><div><div class="micro">Semaine du 16 au 22 septembre</div><h1>Cette semaine</h1></div></div>
+        <div class="kpis">
+          <div class="kpi"><div class="arc"></div><div class="kpi-k">Messages traités</div><div class="kpi-v">312</div><div class="kpi-n">par Coumba et Malick</div></div>
+          <div class="kpi"><div class="arc"></div><div class="kpi-k">Leads qualifiés</div><div class="kpi-v">41</div><div class="kpi-n">dont 14 avec un numéro étranger</div></div>
+          <div class="kpi"><div class="arc"></div><div class="kpi-k">Visites proposées</div><div class="kpi-v">17</div><div class="kpi-n">&nbsp;</div></div>
+          <div class="kpi"><div class="arc"></div><div class="kpi-k">Dossiers résolus</div><div class="kpi-v">23<small> / 27</small></div><div class="kpi-n">4 encore ouverts</div></div>
+        </div>
+        <h2>Activité</h2>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-hd"><div><h3>Temps de réponse moyen</h3><div style="font-size:12px;color:var(--ink-3);margin-top:2px">7 derniers jours · en secondes</div></div></div>
+            <div class="chartwrap" id="chartWrap"><svg class="chartsvg" id="chart" viewBox="0 0 560 190" preserveAspectRatio="none" role="img" aria-label="Temps de réponse moyen par jour"></svg><div class="tip" id="tip"></div></div>
+            <div class="measured"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg><div>Avant l'installation, votre délai de réponse mesuré était de <b>6 h 12</b> — relevé unique du 14 septembre, lors de l'audit. Il n'est pas tracé ici : une seule mesure ne fait pas une courbe.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-hd"><h3>Qui a fait quoi</h3></div>
+            <div class="split">
+              <div class="sp-row"><span class="sp-n">Coumba</span><span class="sp-bar"><span class="sp-fill" style="width:68%;background:var(--brand)"></span></span><span class="sp-v">212</span></div>
+              <div class="sp-row"><span class="sp-n">Malick</span><span class="sp-bar"><span class="sp-fill" style="width:32%;background:var(--accent)"></span></span><span class="sp-v">100</span></div>
+              <div style="border-top:1px solid var(--line-2);padding-top:var(--s4);font-size:12.5px;color:var(--ink-2);line-height:1.6">Coumba a traité <b style="color:var(--ink)">212</b> conversations d'acheteurs et de candidats locataires. Malick a pris en charge <b style="color:var(--ink)">100</b> demandes de locataires en place.</div>
+            </div>
+          </div>
+        </div>
+        <h2>Ce qui demande votre attention</h2>
+        <div class="card" id="attention"></div>
+      </section>
+
+      <section class="view" id="v-conversations"></section>
+      <section class="view" id="v-leads"></section>
+      <section class="view" id="v-visites"></section>
+      <section class="view" id="v-dossiers"></section>
+      <section class="view" id="v-biens"></section>
+      <section class="view" id="v-ajout"></section>
+      <section class="view" id="v-detail"></section>
+
+      <section class="view" id="v-coumba">
+        <div class="agenthero">
+          <div class="big" style="background:var(--brand-soft);color:var(--brand)">C</div>
+          <div class="ah-body">
+            <div class="ah-name">Coumba</div><div class="ah-role">Chargée de clientèle</div>
+            <p class="ah-desc">Je réponds à vos acheteurs et à vos candidats locataires sur WhatsApp, à toute heure. Je qualifie leur budget, leur zone et leur délai, puis je les oriente vers votre page de prise de rendez-vous.</p>
+            <div class="ah-stats"><span><b>212</b> conversations cette semaine</span><span><b>41</b> leads qualifiés</span><span><b>17</b> visites proposées</span></div>
+          </div>
+        </div>
+        <div id="coumbaBooking"></div>
+        <div class="card"><div class="card-hd"><h3>Ses conversations récentes</h3><button class="link" data-go="conversations">Tout voir</button></div><div id="coumbaList"></div></div>
+        <div class="card"><div class="card-hd"><h3>Ses meilleurs leads</h3><button class="link" data-go="leads">Tout voir</button></div><div id="coumbaLeads"></div></div>
+      </section>
+
+      <section class="view" id="v-amadou">
+        <div class="agenthero">
+          <div class="big" style="background:var(--third-soft);color:var(--third)">A</div>
+          <div class="ah-body">
+            <div class="ah-name">Amadou</div><div class="ah-role">Agent catalogue</div>
+            <p class="ah-desc">Vous me donnez l'adresse d'une de vos annonces, je la lis et j'en prépare la fiche : type, typologie, quartier, prix, équipements, services. Ce que l'annonce ne dit pas, je le laisse vide plutôt que de l'inventer — vous complétez, puis vous publiez.</p>
+            <div class="ah-stats"><span><b>15</b> biens au catalogue</span><span><b>5</b> importés depuis une URL</span><span><b>3</b> champs à confirmer</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-hd"><h3>Biens à compléter avant publication</h3><button class="link" data-go="biens">Tout le catalogue</button></div><div id="amadouList"></div></div>
+        <div class="card"><div class="card-hd"><h3>Ajouter un bien</h3></div>
+          <div style="padding:0 var(--s4) var(--s4)"><button class="btn btn-p" data-new="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Depuis une URL ou un formulaire</button></div>
+        </div>
+      </section>
+
+      <section class="view" id="v-malick">
+        <div class="agenthero">
+          <div class="big" style="background:var(--accent-soft);color:var(--accent)">M</div>
+          <div class="ah-body">
+            <div class="ah-name">Malick</div><div class="ah-role">Régisseur</div>
+            <p class="ah-desc">Je reçois les demandes de vos locataires en place sur WhatsApp, avec photos. Je pose les bonnes questions, j'ouvre un dossier structuré et je vous remonte ce qui est urgent — sans que votre équipe décroche.</p>
+            <div class="ah-stats"><span><b>100</b> demandes cette semaine</span><span><b>23</b> dossiers résolus</span><span><b>4</b> ouverts</span></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-hd"><h3>Ses dossiers ouverts</h3><button class="link" data-go="dossiers">Tout voir</button></div><div id="malickList"></div></div>
+        <div class="card">
+          <div class="card-hd"><h3>Nature des demandes — 30 derniers jours</h3></div>
+          <div class="split">
+            <div class="sp-row"><span class="sp-n">Plomberie</span><span class="sp-bar"><span class="sp-fill" style="width:34%;background:var(--accent)"></span></span><span class="sp-v">34 %</span></div>
+            <div class="sp-row"><span class="sp-n">Climatisation</span><span class="sp-bar"><span class="sp-fill" style="width:27%;background:var(--accent)"></span></span><span class="sp-v">27 %</span></div>
+            <div class="sp-row"><span class="sp-n">Électricité</span><span class="sp-bar"><span class="sp-fill" style="width:19%;background:var(--accent)"></span></span><span class="sp-v">19 %</span></div>
+            <div class="sp-row"><span class="sp-n">Administratif</span><span class="sp-bar"><span class="sp-fill" style="width:20%;background:var(--accent)"></span></span><span class="sp-v">20 %</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="rightcol">
+      <div class="greet">
+        <div style="display:flex;align-items:flex-start;gap:var(--s3)">
+          <div style="flex:1"><h2>Bonjour Arouna</h2><div class="d">Mardi 22 septembre</div></div>
+          <button class="iconbtn theme" aria-label="Thème" style="width:34px;height:34px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></button>
+        </div>
+        <div class="nowlist"><div class="micro" style="margin-bottom:var(--s3)">En ce moment</div><div id="nowList"></div></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function () {
+/* ═══════════ DONNÉES DE DÉMONSTRATION ═══════════ */
+var TPL = {
+  handover: "Bonjour {{first_name}}, un conseiller de Résidences Atlantique va vous contacter personnellement dans les prochaines minutes au sujet de {{subject}}.",
+  slot: "Bonjour {{first_name}}, souhaitez-vous programmer une visite de {{property_name}} ?   [ Oui, programmer ]  [ Plus tard ]",
+  slot_followup: "Bonjour {{first_name}}, nous n'avons pas eu votre retour concernant la visite de {{property_name}}. Souhaitez-vous toujours la programmer ?   [ Oui, programmer ]  [ Plus tard ]"
+};
+
+function mk(n){ return n.split(' ').map(function(w){return w[0]}).join('').slice(0,2).toUpperCase(); }
+
+var LEADS = [
+  {id:'l1', name:'Mamadou Diallo', phone:'+33 6 51 22 84 14', city:'Paris', dia:1, score:94, budget:'290 M FCFA', zone:'Ngor', type:'Villa', notes:'4 chambres, vue mer souhaitée', intent:'Achat', when:'Retour en décembre', ts:'2026-09-22T02:31', last:"Oui volontiers. Plutôt en fin de semaine si possible.", prop:'Villa Ngor Corniche',
+   thread:[
+    {d:'in', t:"Bonjour, je suis tombé sur l'annonce de la villa à Ngor. Elle est toujours disponible ?", ts:'22 sept · 02:31'},
+    {d:'out', t:"Bonjour. Coumba, assistante de Résidences Atlantique — je suis un agent automatisé, un conseiller prend le relais dès que c'est utile. Oui, la Villa Ngor Corniche est toujours disponible. Pour vous orienter au mieux : c'est pour un achat, et dans quel délai ?", ts:'38 s de délai'},
+    {d:'in', t:"Achat oui. Je rentre au pays en décembre, c'est pour la famille.", ts:'+ 3 min'},
+    {d:'out', t:"Noté. Combien de chambres vous faut-il au minimum ?", ts:'+ 3 min'},
+    {d:'in', t:"4 au minimum. Et il me faut de la place dehors pour les enfants.", ts:'+ 4 min'},
+    {d:'out', t:"La villa fait 320 m², de plain-pied : 6 pièces dont 4 chambres et 3 salles d'eau, avec jardin, piscine, garage et groupe électrogène. Elle est à 285 000 000 FCFA. Est-ce que cet ordre de prix correspond à ce que vous aviez prévu ?", ts:'+ 5 min'},
+    {d:'in', t:"Oui ça va, je suis autour de 290 maximum.", ts:'+ 8 min'},
+    {d:'out', t:"Parfait, c'est dans votre fourchette. Voici la fiche complète avec les photos : residences-atlantique.sn/biens/villa-ngor-corniche", ts:'+ 8 min'},
+    {d:'in', t:"Merci. Elle est à combien de mètres de la plage exactement ?", ts:'+ 13 min'},
+    {d:'out', t:"Je n'ai pas cette information dans la fiche, et je préfère ne pas vous donner un chiffre au hasard. Je la note pour le conseiller, qui vous confirmera la distance exacte.", ts:'+ 13 min'},
+    {d:'in', t:"D'accord, c'est noté. Il y a un groupe électrogène ? Avec les coupures c'est important pour moi.", ts:'+ 15 min'},
+    {d:'out', t:"Oui, la villa en est équipée. Le gardiennage est également inclus.", ts:'+ 15 min'},
+    {d:'in', t:"Très bien. Le problème c'est que je ne suis à Dakar qu'en décembre, je ne peux pas visiter avant.", ts:'+ 17 min'},
+    {d:'out', t:"Nous faisons des visites en visio : un conseiller se déplace avec son téléphone et vous suivez en direct. C'est possible en soirée pour s'adapter à votre heure en France. Souhaitez-vous que je vous propose des créneaux ?", ts:'+ 18 min'},
+    {d:'in', t:"Oui volontiers. Plutôt en fin de semaine si possible.", ts:'+ 20 min'},
+    {d:'out', t:"C'est transmis. Un conseiller vous proposera deux créneaux de fin de semaine dans la journée, et il aura la réponse sur la distance de la plage.", ts:'+ 20 min'}
+   ]},
+  {id:'l2', name:'Sophie Bernard', phone:'+33 7 84 09 33 27', city:'Lyon', dia:1, score:88, budget:'120 M FCFA', zone:'Saly', type:'Villa', notes:'avec piscine, proche plage', intent:'Achat', when:'Sous 6 mois', ts:'2026-09-22T08:47', last:"Une visio-visite serait possible samedi matin, heure de Paris ?", prop:'Villa Saly piscine'},
+  {id:'l3', name:'Aïssatou Fall', phone:'+221 77 614 28 05', city:'Dakar', dia:0, score:76, budget:'650 k FCFA/mois', zone:'Mermoz', type:'Appartement', notes:'F3 meublé, bail 6 mois', intent:'Location', when:'6 mois', ts:'2026-09-22T09:12', last:"Bonjour, je cherche un F3 meublé pour six mois", prop:'Résidence Mermoz — F3'},
+  {id:'l4', name:'Fatou Ndiaye', phone:'+221 78 330 91 44', city:'Dakar', dia:0, score:71, budget:'45 M FCFA', zone:'Yoff', type:'Appartement', notes:'', intent:'Achat', when:'Non précisé', ts:'2026-09-16T14:02', last:"Relancée deux fois — dernier message resté sans réponse", prop:'—'},
+  {id:'l5', name:null, phone:'+33 6 12 77 40 92', city:null, dia:1, score:68, budget:'À qualifier', zone:'Almadies', type:'À qualifier', notes:'', intent:'Achat', when:'Non précisé', ts:'2026-09-22T07:20', last:"Bonjour, vous avez quoi comme villa aux Almadies ?", prop:'—'},
+  {id:'l6', name:'Ousmane Sarr', phone:'+221 76 208 15 63', city:'Dakar', dia:0, score:42, budget:'Non communiqué', zone:'Diamniadio', type:'Terrain', notes:'', intent:'Achat', when:'Non précisé', ts:'2026-09-22T08:05', last:"Le terrain de Diamniadio, il fait combien exactement ?", prop:'Terrain Diamniadio'},
+  {id:'l7', name:'Khady Sow', phone:'+221 77 902 44 18', city:'Thiès', dia:0, score:65, budget:'38 M FCFA', zone:'Thiès', type:'Villa', notes:'maison familiale', intent:'Achat', when:'2027', ts:'2026-09-21T16:40', last:"Vous avez des biens à Thiès aussi ?", prop:'—'},
+  {id:'l8', name:'Pierre Lemoine', phone:'+33 6 98 21 55 03', city:'Bruxelles', dia:1, score:81, budget:'95 M FCFA', zone:'Saly', type:'Villa', notes:'', intent:'Investissement', when:'Sous 3 mois', ts:'2026-09-21T21:15', last:"Quel rendement locatif je peux espérer sur Saly ?", prop:'Villa Saly piscine'},
+  {id:'l9', name:'Bineta Diouf', phone:'+221 70 445 77 29', city:'Dakar', dia:0, score:58, budget:'400 k FCFA/mois', zone:'Point E', type:'Appartement', notes:'F2', intent:'Location', when:'Immédiat', ts:'2026-09-21T11:30', last:"Le F2 du Point E est encore libre ?", prop:'—'},
+  {id:'l10', name:'Cheikh Mbaye', phone:'+221 77 158 63 90', city:'Dakar', dia:0, score:49, budget:'À qualifier', zone:'Ouakam', type:'À qualifier', notes:'', intent:'Achat', when:'Non précisé', ts:'2026-09-20T18:22', last:"Bonjour", prop:'—'},
+  {id:'l11', name:'Awa Camara', phone:'+33 7 61 30 88 41', city:'Paris', dia:1, score:73, budget:'60 M FCFA', zone:'Yoff', type:'Appartement', notes:'', intent:'Achat', when:'Été 2027', ts:'2026-09-20T09:05', last:"Je prépare un achat pour l'été prochain", prop:'—'},
+  {id:'l12', name:'Ibrahima Ba', phone:'+221 78 774 12 36', city:'Mbour', dia:0, score:61, budget:'25 M FCFA', zone:'Mbour', type:'Terrain', notes:'', intent:'Achat', when:'Non précisé', ts:'2026-09-19T15:48', last:"Terrain viabilisé du côté de Mbour ?", prop:'—'},
+  {id:'l13', name:'Nathalie Roux', phone:'+33 6 44 90 12 77', city:null, dia:1, score:84, budget:'140 M FCFA', zone:'Almadies', type:'Villa', notes:'', intent:'Achat', when:'Sous 4 mois', ts:'2026-09-19T20:11', last:"Le dossier juridique est disponible avant visite ?", prop:'—'},
+  {id:'l14', name:'Modou Faye', phone:'+221 77 336 08 52', city:'Dakar', dia:0, score:55, budget:'520 k FCFA/mois', zone:'Sacré-Cœur', type:'Appartement', notes:'F4, pour novembre', intent:'Location', when:'Novembre', ts:'2026-09-18T10:27', last:"Un F4 pour novembre, c'est possible ?", prop:'—'},
+  {id:'l15', name:'Rama Gueye', phone:'+221 76 611 93 74', city:'Dakar', dia:0, score:47, budget:'À qualifier', zone:'Ngor', type:'À qualifier', notes:'', intent:'Location', when:'Non précisé', ts:'2026-09-17T13:09', last:"C'est combien le loyer à Ngor en général ?", prop:'—'}
+];
+
+/* Pas de table de biens : Malick demande « vous êtes locataire de quel bien ? »
+   et la réponse brute du locataire devient le titre du dossier.
+   L'urgence n'est PAS un champ : elle est calculée depuis les 4 faits fermés
+   habitable / coupure / risque / aggravation. Voir urgency(). */
+var DOSSIERS = [
+  {id:'d249', ref:'249', subject:"Almadies, la villa en face du terrain de foot", tenant:'Ndeye Sarr', phone:'+221 77 902 15 48', nature:'Gaz', crit:"odeur de gaz signalée", status:'Ouvert', ts:'2026-09-23T08:12', last:"Forte odeur de gaz dans la cuisine", photos:0, delay:'22 secondes', habitable:'Non', coupure:'Aucune', risque:true, aggravation:true, since:'Il y a une heure'},
+  {id:'d248', ref:'248', subject:"La villa blanche aux Almadies, celle avec le portail vert", tenant:'Fatoumata Ndour', phone:'+221 77 481 20 65', nature:'Plomberie', status:'Ouvert', ts:'2026-09-22T09:47', last:"Là ça coule plus vite qu'il y a une heure, j'ai mis une bassine", photos:2, delay:'38 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:true, since:'Ce matin',
+   thread:[
+    {d:'in', t:"Bonjour, j'ai une fuite sous l'évier de la cuisine, ça mouille tout le placard", ts:'22 sept · 09:47'},
+    {d:'out', t:"Bonjour Fatoumata. Malick, agent automatisé de Résidences Atlantique. Je vais ouvrir un dossier. Vous êtes locataire de quel bien ?", ts:'38 s de délai'},
+    {d:'in', t:"La villa blanche aux Almadies, celle avec le portail vert", ts:'+ 2 min'},
+    {d:'out', t:"Merci. Depuis quand avez-vous constaté la fuite ?", ts:'+ 2 min'},
+    {d:'in', t:"Ce matin en ouvrant le placard. Hier soir il n'y avait rien.", ts:'+ 3 min'},
+    {d:'out', t:"Pouvez-vous m'envoyer une photo du dessous de l'évier ? Ça permet au plombier de venir avec la bonne pièce.", ts:'+ 3 min'},
+    {d:'in', t:"Voilà, j'en ai pris deux", ts:'+ 6 min', photos:2},
+    {d:'out', t:"C'est bien reçu. Trois questions rapides pour classer le dossier. Le logement reste-t-il utilisable normalement ?", ts:'+ 6 min'},
+    {d:'in', t:"Oui oui, c'est juste le placard qui est trempé", ts:'+ 7 min'},
+    {d:'out', t:"Avez-vous une coupure d'eau ou d'électricité ?", ts:'+ 7 min'},
+    {d:'in', t:"Non, rien de coupé", ts:'+ 8 min'},
+    {d:'out', t:"Et est-ce que la situation s'aggrave en ce moment, ou est-elle stable ?", ts:'+ 8 min'},
+    {d:'in', t:"Là ça coule plus vite qu'il y a une heure, j'ai mis une bassine", ts:'+ 11 min'},
+    {d:'out', t:"Merci, c'est une information importante. En attendant l'intervention, vous pouvez fermer le robinet d'arrêt sous l'évier s'il y en a un, pour limiter les dégâts. Le dossier n° 248 est ouvert et remonté à l'agence comme urgent, parce que la fuite s'aggrave. Vous recevrez un message dès qu'un créneau d'intervention sera fixé.", ts:'+ 11 min'}
+   ]},
+  {id:'d247', ref:'247', subject:"Appartement à Mermoz, 3e étage", tenant:'Aminata Ba', phone:'+221 78 205 66 31', nature:'Climatisation', status:'Ouvert', ts:'2026-09-22T07:10', last:"Climatiseur de la chambre principale ne refroidit plus", photos:0, delay:'52 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'2 jours'},
+  {id:'d246', ref:'246', subject:"Yoff, l'immeuble bleu près du marché", tenant:'Serigne Faye', phone:'+221 76 118 40 27', nature:'Plomberie', status:'Ouvert', ts:'2026-09-22T06:30', last:"Plus d'eau du tout depuis hier soir", photos:0, delay:'31 secondes', habitable:'Partiellement', coupure:'Eau', risque:false, aggravation:false, since:'Hier soir'},
+  {id:'d245', ref:'245', subject:"La maison à Ngor en face de la pharmacie", tenant:'Mariama Sy', phone:'+221 77 690 33 08', nature:'Serrurerie', status:'Ouvert', ts:'2026-09-21T14:25', last:"Portail électrique bloqué en position ouverte", photos:1, delay:'44 secondes', habitable:'Oui', coupure:'Aucune', risque:true, aggravation:false, since:'Hier'},
+  {id:'d242', ref:'242', subject:"Point E, immeuble Teranga appartement 7", tenant:'Khalifa Diop', phone:'+221 70 812 47 19', nature:'Administratif', status:'Ouvert', ts:'2026-09-20T11:02', last:"Demande de quittance de loyer pour dossier bancaire", photos:0, delay:'29 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'2 jours'},
+  {id:'d241', ref:'241', subject:"Fann résidence, le 2A", tenant:'Seynabou Thiam', phone:'+221 77 224 90 55', nature:'Électricité', status:'Résolu', ts:'2026-09-19T09:30', last:"Ampoules du couloir remplacées", photos:0, delay:'61 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'3 jours'},
+  {id:'d239', ref:'239', subject:"Almadies, la villa à côté de l'école", tenant:'Ousseynou Kane', phone:'+221 78 507 31 26', nature:'Plomberie', status:'Résolu', ts:'2026-09-18T16:14', last:"Chauffe-eau remis en service", photos:1, delay:'47 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'4 jours'},
+  {id:'d238', ref:'238', subject:"Mermoz, premier étage gauche", tenant:'Coumba Lo', phone:'+221 77 043 88 12', nature:'Climatisation', status:'Résolu', ts:'2026-09-17T08:40', last:"Recharge de gaz effectuée", photos:0, delay:'35 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'5 jours'},
+  {id:'d236', ref:'236', subject:"Ngor, la petite villa jaune", tenant:'Abdou Sène', phone:'+221 76 320 74 91', nature:'Électricité', status:'Résolu', ts:'2026-09-16T17:55', last:"Disjoncteur remplacé", photos:2, delay:'40 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'6 jours'},
+  {id:'d234', ref:'234', subject:"Point E appartement 3", tenant:'Ndeye Fall', phone:'+221 77 855 60 47', nature:'Plomberie', status:'Résolu', ts:'2026-09-15T12:20', last:"Chasse d'eau réparée", photos:1, delay:'55 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'7 jours'},
+  {id:'d232', ref:'232', subject:"Almadies, près du rond-point", tenant:'Samba Diagne', phone:'+221 78 177 22 63', nature:'Administratif', status:'Résolu', ts:'2026-09-14T10:05', last:"Attestation de résidence transmise", photos:0, delay:'26 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'8 jours'},
+  {id:'d230', ref:'230', subject:"Fann, appartement 5B", tenant:'Astou Diallo', phone:'+221 70 663 41 08', nature:'Climatisation', status:'Résolu', ts:'2026-09-13T14:47', last:"Unité extérieure nettoyée", photos:1, delay:'49 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'9 jours'},
+  {id:'d229', ref:'229', subject:"Ngor, la villa au bout de la rue", tenant:'Malick Niang', phone:'+221 77 590 12 74', nature:'Serrurerie', status:'Résolu', ts:'2026-09-12T09:15', last:"Barillet de la porte principale remplacé", photos:0, delay:'33 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'10 jours'},
+  {id:'d227', ref:'227', subject:"Mermoz, 4e étage porte A", tenant:'Adama Cissé', phone:'+221 76 744 28 90', nature:'Plomberie', status:'Résolu', ts:'2026-09-11T11:33', last:"Robinet de la salle de bain remplacé", photos:2, delay:'42 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'11 jours'},
+  {id:'d225', ref:'225', subject:"Point E, le 9", tenant:'Yacine Mbodj', phone:'+221 77 312 85 06', nature:'Électricité', status:'Résolu', ts:'2026-09-10T15:58', last:"Prise de la cuisine remise aux normes", photos:0, delay:'58 secondes', habitable:'Oui', coupure:'Aucune', risque:false, aggravation:false, since:'12 jours'}
+];
+
+/* ── L'urgence est CALCULÉE, jamais jugée par le modèle.
+      Elle est déduite de quatre faits fermés établis par Malick,
+      et elle porte toujours sa justification. ── */
+function urgency(d){
+  if (d.forced) return { lvl:d.forced, why:'forcé par Arouna', forced:true };
+  if (d.crit)   return { lvl:'securite', why:d.crit };
+  var why = [];
+  if (d.habitable === 'Non') why.push('logement inhabitable');
+  else if (d.habitable === 'Partiellement') why.push('logement partiellement utilisable');
+  if (d.coupure && d.coupure !== 'Aucune')
+    why.push(d.coupure === 'Eau et électricité' ? 'eau et électricité coupées' : d.coupure.toLowerCase()+' coupée');
+  if (d.risque) why.push('risque de sécurité');
+  if (d.aggravation) why.push("situation qui s'aggrave");
+  if (why.length) return { lvl:'urgent', why:why[0] };
+  if (d.nature === 'Administratif') return { lvl:'faible', why:'demande administrative' };
+  return { lvl:'normal', why:'' };
+}
+function urgBadge(d){
+  var u = urgency(d);
+  if (u.lvl === 'securite') return '<span class="badge urg">Sécurité · '+esc(u.why)+'</span>';
+  if (u.lvl === 'urgent')   return '<span class="badge urg">Urgent · '+esc(u.why)+'</span>';
+  if (u.lvl === 'faible')   return '<span class="badge nt">Faible</span>';
+  return '';
+}
+
+/* Modèle de bien : champs contraints (enum) pour tout ce qui est filtrable,
+   équipements et services en listes fermées, texte d'annonce conservé brut.
+   « à qualifier » est toujours une valeur autorisée. */
+var BIENS = [
+  {id:'b1', ref:'MRZ-F4-01', titre:"Appartement F4 à Mermoz, 1er étage",
+   transaction:'Location longue durée', type:'Appartement', typologie:'F4',
+   ville:'Dakar', quartier:'Mermoz', etage:'1er', surface:null,
+   pieces:5, chambres:3, sdb:3, wc_visiteurs:true,
+   prix:1200000, periode:'mois', charges:'Hors charges',
+   meuble:'À qualifier', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Cuisine équipée','Four','Lave-vaisselle','Lave-linge','Balcon','Garage'],
+   services:['Gardiennage','Wifi inclus','Ménage','Espaces communs'],
+   notes:"Femme de ménage 3 fois par semaine. Terrasse commune aménagée sur le toit : salon d'été et barbecue.",
+   url:'https://www.expat-dakar.com/annonce/appartement-f4-mermoz', source:'URL', vues:0, leads:0,
+   brut:"A Mermoz , au premier étage Appartement F4 , composé d'un grand , lumineux salon ; 3 chambres , chambre principale avec toilettes internes, toilettes pour les 2 chambres … wc visiteurs, grande cuisine équipée : four, lave-vaisselle linge, lave-vaisselle. Grand balcon … Loyer longue durée : 1.200.000 hors charges. Femme de ménage 3 fois par semaine, wifi, gardiennage, garage. Terrasse commune aménagée sur le toit, salon d'été, barbecue.",
+   aconfirmer:['surface','meuble']},
+
+  {id:'b2', ref:'NGR-V4-01', titre:"Villa Ngor Corniche",
+   transaction:'Vente', type:'Villa', typologie:'F5',
+   ville:'Dakar', quartier:'Ngor', etage:'Plain-pied', surface:320,
+   pieces:6, chambres:4, sdb:3, wc_visiteurs:true,
+   prix:285000000, periode:null, charges:null,
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Piscine','Cuisine équipée','Climatisation','Jardin','Garage','Groupe électrogène'],
+   services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/villa-ngor-corniche', source:'Formulaire', vues:41, leads:6, brut:'', aconfirmer:[]},
+
+  {id:'b3', ref:'SLY-V3-01', titre:"Villa avec piscine à Saly",
+   transaction:'Vente', type:'Villa', typologie:'F4',
+   ville:'Mbour', quartier:'Saly', etage:'Plain-pied', surface:240,
+   pieces:5, chambres:3, sdb:2, wc_visiteurs:false,
+   prix:120000000, periode:null, charges:null,
+   meuble:'Meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Piscine','Climatisation','Jardin','Cuisine équipée'],
+   services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/villa-piscine-saly', source:'URL', vues:28, leads:4, brut:'', aconfirmer:[]},
+
+  {id:'b4', ref:'YOF-A3-01', titre:"Appartement vue mer à Yoff",
+   transaction:'Vente', type:'Appartement', typologie:'F3',
+   ville:'Dakar', quartier:'Yoff', etage:'3e', surface:110,
+   pieces:4, chambres:3, sdb:2, wc_visiteurs:false,
+   prix:62000000, periode:null, charges:null,
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Climatisation','Balcon','Ascenseur'],
+   services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/appartement-vue-mer-yoff', source:'Formulaire', vues:23, leads:3, brut:'', aconfirmer:[]},
+
+  {id:'b5', ref:'OUK-V4-01', titre:"Villa contemporaine à Ouakam",
+   transaction:'Vente', type:'Villa', typologie:'F5',
+   ville:'Dakar', quartier:'Ouakam', etage:'R+1', surface:260,
+   pieces:6, chambres:4, sdb:3, wc_visiteurs:true,
+   prix:175000000, periode:null, charges:null,
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Climatisation','Terrasse','Garage','Cuisine équipée'],
+   services:[], notes:'', url:'https://drive.google.com/file/d/1kQv8OuakamBrochure/view', source:'Formulaire', vues:31, leads:5, brut:'', aconfirmer:[]},
+
+  {id:'b6', ref:'PTE-A2-01', titre:"F2 au Point E",
+   transaction:'Location longue durée', type:'Appartement', typologie:'F2',
+   ville:'Dakar', quartier:'Point E', etage:'2e', surface:58,
+   pieces:3, chambres:1, sdb:1, wc_visiteurs:false,
+   prix:400000, periode:'mois', charges:'Hors charges',
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Climatisation','Balcon'], services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/f2-point-e', source:'Formulaire', vues:15, leads:2, brut:'', aconfirmer:[]},
+
+  {id:'b7', ref:'SCR-A4-01', titre:"Duplex F4 à Sacré-Cœur",
+   transaction:'Location longue durée', type:'Appartement', typologie:'F4',
+   ville:'Dakar', quartier:'Sacré-Cœur', etage:'4e et 5e', surface:140,
+   pieces:5, chambres:3, sdb:2, wc_visiteurs:true,
+   prix:520000, periode:'mois', charges:'Charges comprises',
+   meuble:'Meublé', dispo:'À partir du…', dispo_date:'2026-11-01', status:'Publié',
+   equip:['Climatisation','Cuisine équipée','Terrasse','Ascenseur'],
+   services:['Gardiennage','Wifi inclus'],
+   notes:'', url:'https://residences-atlantique.sn/biens/duplex-f4-sacre-coeur', source:'URL', vues:18, leads:4, brut:'', aconfirmer:[]},
+
+  {id:'b8', ref:'DMD-T-01', titre:"Terrain à Diamniadio",
+   transaction:'Vente', type:'Terrain', typologie:'—',
+   ville:'Diamniadio', quartier:'Pôle urbain', etage:'—', surface:null,
+   pieces:null, chambres:null, sdb:null, wc_visiteurs:false,
+   prix:null, periode:null, charges:null,
+   meuble:'—', dispo:'Disponible', dispo_date:null, status:'Dépublié',
+   equip:[], services:[], notes:'', url:'', source:'Formulaire', vues:0, leads:1, brut:'',
+   aconfirmer:['surface','prix']},
+
+  {id:'b9', ref:'MBR-T-01', titre:"Terrain viabilisé à Mbour",
+   transaction:'Vente', type:'Terrain', typologie:'—',
+   ville:'Mbour', quartier:'Centre', etage:'—', surface:400,
+   pieces:null, chambres:null, sdb:null, wc_visiteurs:false,
+   prix:25000000, periode:null, charges:null,
+   meuble:'—', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:[], services:[], notes:'', url:'', source:'Formulaire', vues:9, leads:1, brut:'', aconfirmer:[]},
+
+  {id:'b10', ref:'THS-V3-01', titre:"Maison avec jardin à Thiès",
+   transaction:'Vente', type:'Villa', typologie:'F4',
+   ville:'Thiès', quartier:'Centre', etage:'Plain-pied', surface:180,
+   pieces:5, chambres:3, sdb:2, wc_visiteurs:false,
+   prix:38000000, periode:null, charges:null,
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Jardin','Garage'], services:[],
+   notes:'', url:'https://residences-atlantique.sn/biens/maison-jardin-thies', source:'Formulaire', vues:7, leads:1, brut:'', aconfirmer:[]},
+
+  {id:'b11', ref:'PLT-A2-01', titre:"Appartement au Plateau",
+   transaction:'Vente', type:'Appartement', typologie:'F3',
+   ville:'Dakar', quartier:'Plateau', etage:'5e', surface:86,
+   pieces:4, chambres:2, sdb:1, wc_visiteurs:false,
+   prix:54000000, periode:null, charges:null,
+   meuble:'Non meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Climatisation','Ascenseur'], services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/appartement-plateau', source:'Formulaire', vues:16, leads:2, brut:'', aconfirmer:[]},
+
+  {id:'b12', ref:'SOM-V3-01', titre:"Villa bord de mer à Somone",
+   transaction:'Vente', type:'Villa', typologie:'F4',
+   ville:'Mbour', quartier:'Somone', etage:'Plain-pied', surface:210,
+   pieces:5, chambres:3, sdb:2, wc_visiteurs:true,
+   prix:98000000, periode:null, charges:null,
+   meuble:'Meublé', dispo:'Disponible', dispo_date:null, status:'Publié',
+   equip:['Piscine','Jardin','Climatisation'], services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/villa-bord-de-mer-somone', source:'URL', vues:22, leads:3, brut:'', aconfirmer:[]},
+
+  {id:'b13', ref:'ALM-V5-01', titre:"Villa aux Almadies",
+   transaction:'Location longue durée', type:'Villa', typologie:'F6+',
+   ville:'Dakar', quartier:'Almadies', etage:'R+1', surface:280,
+   pieces:7, chambres:5, sdb:4, wc_visiteurs:true,
+   prix:900000, periode:'mois', charges:'Hors charges',
+   meuble:'Non meublé', dispo:'À partir du…', dispo_date:'2027-01-31', status:'Publié',
+   equip:['Piscine','Climatisation','Jardin','Garage'], services:['Gardiennage'],
+   notes:'', url:'https://residences-atlantique.sn/biens/villa-almadies', source:'Formulaire', vues:12, leads:0, brut:'', aconfirmer:[]},
+
+  {id:'b14', ref:'FAN-A2-01', titre:"Appartement à Fann Résidence",
+   transaction:'Location longue durée', type:'Appartement', typologie:'F3',
+   ville:'Dakar', quartier:'Fann', etage:'2e', surface:75,
+   pieces:4, chambres:2, sdb:1, wc_visiteurs:false,
+   prix:480000, periode:'mois', charges:'Hors charges',
+   meuble:'Non meublé', dispo:'À partir du…', dispo_date:'2026-12-15', status:'Dépublié',
+   equip:['Climatisation','Balcon'], services:['Gardiennage'],
+   notes:'', url:'', source:'Formulaire', vues:11, leads:0, brut:'', aconfirmer:[]},
+
+  {id:'b15', ref:'NGP-T-01', titre:"Terrain à Ngaparou",
+   transaction:'Vente', type:'Terrain', typologie:'—',
+   ville:'Mbour', quartier:'Ngaparou', etage:'—', surface:300,
+   pieces:null, chambres:null, sdb:null, wc_visiteurs:false,
+   prix:18000000, periode:null, charges:null,
+   meuble:'—', dispo:'Disponible', dispo_date:null, status:'Dépublié',
+   equip:[], services:[], notes:'', url:'', source:'Formulaire', vues:0, leads:0, brut:'', aconfirmer:['prix']}
+];
+
+/* Les domaines de l'agence sont de la configuration par tenant — au pluriel : une agence
+   peut avoir un site et un sous-domaine d'annonces. */
+var TENANT = { name:'Résidences Atlantique', domains:['residences-atlantique.sn'] };
+
+/* Prise de rendez-vous : on n'intègre aucun agenda. Coumba envoie le lien que
+   l'agence utilise déjà, ou annonce un rappel s'il n'y en a pas.
+   Deux liens possibles : location et vente ne sont pas suivies par la même personne. */
+var BOOK = {
+  split: false,
+  rental: 'https://calendly.com/residences-atlantique/visite',
+  sale: ''
+};
+function bookingUrl(intent){
+  if (intent === 'Location') return BOOK.rental || null;
+  return (BOOK.split ? BOOK.sale : BOOK.rental) || null;
+}
+
+/* Liste de référence tenue par Codaya, par pays. Elle sert à UNE chose : ne prévenir
+   que pour un site qu'on reconnaît réellement comme une place de marché immobilière.
+   Un domaine inconnu ne dit rien — ce peut être un PDF sur Drive, une visite en vidéo,
+   la page Facebook de l'agence. On n'invente pas un diagnostic à partir d'un domaine. */
+var MARKETPLACES = {
+  'expat-dakar.com':'Expat-Dakar', 'senimmo.sn':'SenImmo', 'coinafrique.com':'CoinAfrique',
+  'jumia.sn':'Jumia Deals', 'seloger.com':'SeLoger', 'bienici.com':'Bien’ici', 'leboncoin.fr':'leboncoin'
+};
+
+function hostOf(u){ try { return String(u).split('/')[2].replace(/^www\./,'').toLowerCase(); } catch(e){ return ''; } }
+function under(host, d){ return host === d || host.slice(-(d.length+1)) === '.'+d; }
+
+/* Quatre états, et un seul déclenche un avertissement commercial. */
+function linkState(b){
+  if (!b.url) return 'aucun';
+  var host = hostOf(b.url);
+  for (var i=0; i<TENANT.domains.length; i++) if (under(host, TENANT.domains[i])) return 'propre';
+  for (var d in MARKETPLACES) if (under(host, d)) return 'place';
+  return 'autre';
+}
+function marketplaceName(b){
+  var host = hostOf(b.url);
+  for (var d in MARKETPLACES) if (under(host, d)) return MARKETPLACES[d];
+  return host;
+}
+
+var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+/* Une date n'est affichée que si elle existe. Pas de date → « à confirmer », jamais de mois inventé. */
+function dfr(iso){
+  if (!iso) return null;
+  var p = String(iso).split('-'); if (p.length !== 3) return null;
+  var j = parseInt(p[2], 10);
+  return (j === 1 ? '1er' : j) + ' ' + MOIS[parseInt(p[1], 10) - 1] + ' ' + p[0];
+}
+/* Publication et disponibilité sont deux axes indépendants : un bien peut être
+   publié alors qu'il n'est libre qu'en janvier, ou dépublié alors qu'il est libre. */
+function dispoLabel(b){
+  if (b.dispo === 'Disponible') return 'Disponible';
+  var d = dfr(b.dispo_date);
+  return d ? 'À partir du ' + d : null;
+}
+function prix(b){
+  if (b.prix == null) return 'Prix à définir';
+  var n = b.prix.toLocaleString('fr-FR').replace(/\u202f|\s/g,' ');
+  return n + ' FCFA' + (b.periode ? '/' + b.periode : '');
+}
+
+/* Ce ne sont pas des rendez-vous : nous n'en connaissons ni la date ni l'existence.
+   Ce sont des demandes de visite, et ce que Coumba en a fait. */
+var VISITES = [
+  {id:'v1', prop:'Villa Ngor Corniche', lead:'l2', intent:'Achat', mode:'link', since:'18 h', ts:'2026-09-22T08:51'},
+  {id:'v2', prop:'Résidence Mermoz — F3', lead:'l3', intent:'Location', mode:'link', since:'3 h', ts:'2026-09-22T09:18'},
+  {id:'v3', prop:'Villa Saly piscine', lead:'l8', intent:'Achat', mode:'link', since:'4 h', ts:'2026-09-21T21:22'},
+  {id:'v4', prop:'Villa Ngor Corniche', lead:'l1', intent:'Achat', mode:'callback', since:'20 min', ts:'2026-09-22T02:51'},
+  {id:'v5', prop:'Appartement Yoff vue mer', lead:'l11', intent:'Achat', mode:'link', since:'2 j', ts:'2026-09-20T09:11'},
+  {id:'v6', prop:'Villa Ouakam contemporaine', lead:'l13', intent:'Achat', mode:'callback', since:'1 j', ts:'2026-09-19T20:18'},
+  {id:'v7', prop:'Duplex Sacré-Cœur', lead:'l14', intent:'Location', mode:'link', since:'6 j', ts:'2026-09-18T10:31'}
+];
+
+/* conversations = leads + dossiers, unifiés */
+var CONVS = LEADS.map(function(l){ return {id:l.id, kind:'lead', agent:'coumba', who:l.name, phone:l.phone, last:l.last, ts:l.ts, ref:l}; })
+  .concat(DOSSIERS.map(function(d){ return {id:d.id, kind:'dossier', agent:'malick', who:d.tenant, phone:d.phone, last:d.last, ts:d.ts, ref:d}; }));
+
+/* ═══════════ HELPERS ═══════════ */
+var PER = 12;
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function dstr(ts){ if(!ts) return '—'; var d=new Date(ts); return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})+' · '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
+function label(c){ return c.who ? esc(c.who) : '<span class="row-phone">'+esc(c.phone)+'</span>'; }
+function telLink(p, txt){ return '<a class="telbtn" href="tel:'+p.replace(/\s/g,'')+'" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>'+(txt||esc(p))+'</a>'; }
+/* Bouton avec infobulle.
+   opts.tpl    → affiche le texte exact du template qui part
+   opts.warn   → affiche un avertissement à la place du message
+   opts.act    → identifiant de l'action (mutation d'état)
+   opts.off    → bouton désactivé (action déjà faite) */
+var TOUCH = matchMedia('(hover: none) and (pointer: coarse)').matches;
+var PHONE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>';
+/* Sur mobile le lien tel: compose directement.
+   Sur ordinateur composer n'a pas de sens : le clic revele le numero. */
+function callBtn(phone, label){
+  return '<a class="btn btn-p" href="tel:'+phone.replace(/\s/g,'')+'" data-call="'+esc(phone)+'">'+PHONE_SVG+' '+esc(label)+'</a>';
+}
+
+function tplBtn(cls, icon, text, opts){
+  var body = opts.tpl
+    ? '<span class="tt-m">'+esc(TPL[opts.tpl])+'</span>'
+    : '<span class="tt-m" style="font-style:normal">'+esc(opts.warn)+'</span>';
+  return '<span class="tw"><button class="btn '+cls+'"'+(opts.act?' data-act="'+opts.act+'"':'')+(opts.off?' disabled style="opacity:.55;cursor:default"':'')+'>'+icon+text+'</button>'+
+    '<span class="tt" role="tooltip"><span class="tt-k">'+esc(opts.head)+'</span>'+body+'</span></span>';
+}
+
+/* Pagination générique */
+var PAGE = {};
+function paginate(key, items){
+  var p = PAGE[key] || 1, total = Math.max(1, Math.ceil(items.length / PER));
+  if (p > total) { p = total; PAGE[key] = p; }
+  return { slice: items.slice((p-1)*PER, p*PER), page:p, total:total, count:items.length };
+}
+function pager(key, r){
+  if (r.count <= PER) return '';
+  return '<div class="pager"><span class="pager-i">'+((r.page-1)*PER+1)+'–'+Math.min(r.page*PER, r.count)+' sur '+r.count+'</span>'+
+    '<span class="pager-b">'+
+      '<button class="pbtn" data-pg="'+key+'|'+(r.page-1)+'" '+(r.page<=1?'disabled':'')+' aria-label="Précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>'+
+      '<button class="pbtn" data-pg="'+key+'|'+(r.page+1)+'" '+(r.page>=r.total?'disabled':'')+' aria-label="Suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>'+
+    '</span></div>';
+}
+
+/* ═══════════ LIGNES ═══════════ */
+function rowConv(c){
+  var isLead = c.kind === 'lead';
+  var badge = isLead
+    ? (c.ref.dia ? '<span class="badge dia">Diaspora'+(c.ref.city?' · '+esc(c.ref.city):'')+'</span>' : '')
+    : urgBadge(c.ref);
+  var chips = isLead
+    ? '<span class="chip"><b>'+esc(c.ref.budget)+'</b></span><span class="chip">'+esc(c.ref.zone)+'</span><span class="chip">'+esc(c.ref.type)+'</span>'+(c.ref.score>=85?'<span class="chip hot">Lead chaud</span>':'')
+    : '<span class="chip">Dossier <b>#'+esc(c.ref.ref)+'</b></span><span class="chip">'+esc(c.ref.nature)+'</span><span class="chip">'+esc(c.ref.prop)+'</span>';
+  return '<button class="row" data-open="'+c.id+'">'+
+    '<span class="mono '+(isLead?'c1':'c2')+'" style="width:32px;height:32px;font-size:11px">'+(isLead?'C':'M')+'</span>'+
+    '<span class="row-body"><span class="row-l1"><span class="row-name">'+label(c)+'</span>'+badge+
+    '<span class="row-time">'+dstr(c.ts)+'</span></span>'+
+    '<span class="row-msg">'+esc(c.last)+'</span><span class="chips">'+chips+'</span></span></button>';
+}
+function rowLead(l){
+  return '<button class="row" data-open="'+l.id+'">'+
+    '<span class="row-body"><span class="row-l1"><span class="row-name">'+(l.name?esc(l.name):'<span class="row-phone">'+esc(l.phone)+'</span>')+'</span>'+
+    (l.dia?'<span class="badge dia">Diaspora</span>':'')+
+    '<span class="row-time"><span>'+dstr(l.ts)+'</span><span class="score">'+l.score+'</span></span></span>'+
+    '<span class="row-msg">'+esc(l.budget)+' · '+esc(l.zone)+' · '+esc(l.intent)+' · '+esc(l.when)+'</span></span></button>';
+}
+function rowDos(d){
+  var b = d.status==='Résolu' ? '<span class="badge ok">Résolu</span>' : urgBadge(d);
+  return '<button class="row" data-open="'+d.id+'">'+
+    '<span class="mono c2" style="width:32px;height:32px;font-size:11px">'+esc(d.ref)+'</span>'+
+    '<span class="row-body"><span class="row-l1"><span class="row-name">'+esc(d.subject)+'</span>'+b+
+    '<span class="row-time">'+dstr(d.ts)+'</span></span>'+
+    '<span class="row-msg">'+esc(d.last)+'</span>'+
+    '<span class="chips"><span class="chip">'+esc(d.nature)+'</span><span class="chip">Locataire : <b>'+esc(d.tenant)+'</b></span><span class="chip">'+esc(d.phone)+'</span>'+(d.photos?'<span class="chip">'+d.photos+' photo'+(d.photos>1?'s':'')+'</span>':'')+'</span></span></button>';
+}
+function rowBien(b){
+  var badge = b.status==='Publié' ? '<span class="badge ok">Publié</span>' : '<span class="badge nt">Dépublié</span>';
+  var dl = dispoLabel(b);
+  if (b.dispo !== 'Disponible') badge += '<span class="badge nt">'+esc(dl || 'Date à confirmer')+'</span>';
+  var todo = b.aconfirmer.length ? '<span class="badge urg">'+b.aconfirmer.length+' à confirmer</span>' : '';
+  var spec = [];
+  if (b.typologie && b.typologie!=='—') spec.push(b.typologie);
+  if (b.chambres) spec.push(b.chambres+' ch.');
+  if (b.surface) spec.push(b.surface+' m²');
+  spec.push(b.meuble!=='—' ? b.meuble : b.type);
+  return '<button class="row" data-open="'+b.id+'">'+
+    '<span class="mono c4" style="width:32px;height:32px;font-size:10px">'+esc(b.type.slice(0,2).toUpperCase())+'</span>'+
+    '<span class="row-body"><span class="row-l1"><span class="row-name">'+esc(b.titre)+'</span>'+badge+todo+
+    '<span class="row-time">'+esc(prix(b))+'</span></span>'+
+    '<span class="row-msg">'+esc(b.quartier)+', '+esc(b.ville)+' · '+esc(b.transaction)+' · '+esc(spec.join(' · '))+'</span>'+
+    '<span class="chips"><span class="chip">'+esc(b.ref)+'</span>'+
+      (b.status==='Publié' && linkState(b)==='aucun' ? '<span class="chip" style="color:var(--neg);border-color:var(--neg)">Sans lien d\'annonce</span>' : '')+
+      (linkState(b)==='place' ? '<span class="chip" style="color:var(--accent);border-color:var(--accent)">Sur '+esc(marketplaceName(b))+'</span>' : '')+
+      (b.equip.length?'<span class="chip">'+b.equip.length+' équipements</span>':'')+
+      (b.services.length?'<span class="chip">'+b.services.length+' services</span>':'')+
+      '<span class="chip">Fiche vue <b>'+b.vues+'</b> fois</span>'+
+      '<span class="chip"><b>'+b.leads+'</b> lead'+(b.leads>1?'s':'')+'</span>'+
+    '</span></span></button>';
+}
+
+function rowVis(v){
+  var l = LEADS.filter(function(x){return x.id===v.lead})[0] || {};
+  var b = v.mode==='link'
+    ? '<span class="badge ok">Lien envoyé</span>'
+    : '<span class="badge nt">Rappel annoncé</span>';
+  return '<button class="row" data-open="'+v.lead+'">'+
+    '<span class="row-body"><span class="row-l1"><span class="row-name">'+esc(v.prop)+'</span>'+b+
+    '<span class="badge nt">'+esc(v.intent)+'</span>'+
+    '<span class="row-time">il y a '+esc(v.since)+'</span></span>'+
+    '<span class="row-msg">'+(l.name?esc(l.name):esc(l.phone))+' — '+
+      (v.mode==='link' ? "a reçu le lien de prise de rendez-vous" : "un conseiller doit le rappeler pour convenir d'un créneau")+
+    '</span></span></button>';
+}
+
+/* ═══════════ VUES DE LISTE ═══════════ */
+var SORT = { leads:'score', convs:'desc', convFilter:'all' };
+
+function vConversations(){
+  var items = CONVS.filter(function(c){ return SORT.convFilter==='all' || c.kind===SORT.convFilter; })
+    .sort(function(a,b){ return SORT.convs==='desc' ? (a.ts<b.ts?1:-1) : (a.ts>b.ts?1:-1); });
+  var r = paginate('convs', items);
+  return '<div class="pagehead"><div><div class="micro">Coumba et Malick</div><h1>Dernières conversations</h1></div></div>'+
+    '<div class="card"><div class="card-hd">'+
+      '<div style="display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap">'+
+        '<span class="tbl">Type</span><span class="seg">'+
+          '<button data-f="all" class="'+(SORT.convFilter==='all'?'on':'')+'">Toutes</button>'+
+          '<button data-f="lead" class="'+(SORT.convFilter==='lead'?'on':'')+'">Leads</button>'+
+          '<button data-f="dossier" class="'+(SORT.convFilter==='dossier'?'on':'')+'">Locataires</button>'+
+        '</span>'+
+        '<span class="tbl" style="margin-left:var(--s3)">Date</span><span class="seg">'+
+          '<button data-s="desc" class="'+(SORT.convs==='desc'?'on':'')+'">Plus récentes</button>'+
+          '<button data-s="asc" class="'+(SORT.convs==='asc'?'on':'')+'">Plus anciennes</button>'+
+        '</span>'+
+      '</div>'+
+      '<div style="display:flex;gap:var(--s2)"><button class="btn btn-g" data-go="leads">Tous les leads</button><button class="btn btn-g" data-go="dossiers">Tous les dossiers</button></div>'+
+    '</div>'+
+    (r.slice.length ? r.slice.map(rowConv).join('') : '<div class="empty">Aucune conversation.</div>')+
+    pager('convs', r)+'</div>';
+}
+
+function vLeads(){
+  var items = LEADS.slice().sort(function(a,b){
+    if (SORT.leads==='score') return b.score - a.score;
+    return SORT.leads==='desc' ? (a.ts<b.ts?1:-1) : (a.ts>b.ts?1:-1);
+  });
+  var r = paginate('leads', items);
+  return '<div class="pagehead"><div><div class="micro">Coumba · chargée de clientèle</div><h1>Leads</h1></div></div>'+
+    '<div class="card"><div class="card-hd"><div style="display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap">'+
+      '<span class="tbl">Trier</span><span class="seg">'+
+        '<button data-ls="score" class="'+(SORT.leads==='score'?'on':'')+'">Meilleur score</button>'+
+        '<button data-ls="desc" class="'+(SORT.leads==='desc'?'on':'')+'">Plus récents</button>'+
+        '<button data-ls="asc" class="'+(SORT.leads==='asc'?'on':'')+'">Plus anciens</button>'+
+      '</span></div><span class="micro">'+LEADS.length+' leads actifs</span></div>'+
+      r.slice.map(rowLead).join('')+pager('leads', r)+'</div>';
+}
+
+function vDossiers(){
+  var open = DOSSIERS.filter(function(d){return d.status!=='Résolu'});
+  var done = DOSSIERS.filter(function(d){return d.status==='Résolu'});
+  var r = paginate('dos', done);
+  return '<div class="pagehead"><div><div class="micro">Malick · régisseur</div><h1>Dossiers</h1></div></div>'+
+    '<div class="card"><div class="card-hd"><h3>Ouverts</h3><span class="micro">'+open.length+' dossiers</span></div>'+
+      open.map(rowDos).join('')+'</div>'+
+    '<div class="card"><div class="card-hd"><h3>Résolus</h3><span class="micro">'+done.length+' dossiers</span></div>'+
+      r.slice.map(rowDos).join('')+pager('dos', r)+'</div>';
+}
+
+var BFILTER = 'all';
+function vBiens(){
+  var items = BIENS.filter(function(b){
+    if (BFILTER==='all') return true;
+    if (BFILTER==='todo') return b.aconfirmer.length > 0;
+    return b.transaction.indexOf(BFILTER)===0;
+  });
+  var r = paginate('biens', items);
+  return '<div class="pagehead"><div><div class="micro">Amadou · agent catalogue</div><h1>Nos biens</h1></div>'+
+    '<button class="btn btn-p" data-new="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Ajouter un bien</button></div>'+
+    '<div class="card"><div class="card-hd">'+
+      '<div style="display:flex;gap:var(--s2);align-items:center;flex-wrap:wrap"><span class="tbl">Filtrer</span><span class="seg">'+
+        '<button data-bf="all" class="'+(BFILTER==='all'?'on':'')+'">Tous</button>'+
+        '<button data-bf="Vente" class="'+(BFILTER==='Vente'?'on':'')+'">Vente</button>'+
+        '<button data-bf="Location" class="'+(BFILTER==='Location'?'on':'')+'">Location</button>'+
+        '<button data-bf="todo" class="'+(BFILTER==='todo'?'on':'')+'">À confirmer</button>'+
+      '</span></div><span class="micro">'+items.length+' biens</span></div>'+
+      (r.slice.length ? r.slice.map(rowBien).join('') : '<div class="empty">Aucun bien.</div>')+
+      pager('biens', r)+'</div>';
+}
+
+function vVisites(){
+  var r = paginate('vis', VISITES);
+  return '<div class="pagehead"><div><div class="micro">Coumba · chargée de clientèle</div><h1>Demandes de visite</h1></div></div>'+
+    '<div class="safety" style="background:var(--surface-2);border-color:var(--line)">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--ink-3)"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>'+
+      "<div style=\"color:var(--ink-2)\"><b style=\"color:var(--ink)\">On sait ce que Coumba a envoyé, pas ce que le prospect en a fait.</b><br>La réservation se passe sur votre outil de rendez-vous, qui ne nous en informe pas. Aucune date n'est affichée ici : elle serait inventée.</div></div>"+
+    '<div class="card"><div class="card-hd"><h3>Toutes les demandes</h3><span class="micro">'+VISITES.length+' demandes</span></div>'+
+      r.slice.map(rowVis).join('')+pager('vis', r)+'</div>';
+}
+
+/* ═══════════ DÉTAILS ═══════════ */
+function detailLead(l){
+  var v = VISITES.filter(function(x){return x.lead===l.id})[0];
+  var CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+  var visitPanel = '', visitAction = '';
+
+  if (v) {
+    var lien = bookingUrl(v.intent);
+    visitPanel = '<div class="card"><div class="card-hd"><h3>Demande de visite</h3>'+
+      (v.mode==='link' ? '<span class="badge ok">Lien envoyé</span>' : '<span class="badge nt">Rappel annoncé</span>')+'</div>'+
+      '<div class="kv"><span class="kv-k">Bien</span><span class="kv-v">'+esc(v.prop)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Lien concerné</span><span class="kv-v">'+esc(v.intent)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Ce que Coumba a fait</span><span class="kv-v" style="max-width:62%">'+
+        (v.mode==='link'
+          ? "envoyé le lien de prise de rendez-vous"
+          : "annoncé qu'un conseiller rappellerait — aucun lien n'est configuré")+'</span></div>'+
+      (v.mode==='link' && lien ? '<div class="kv"><span class="kv-k">Lien</span><span class="kv-v" style="max-width:62%;word-break:break-all"><a href="'+esc(lien)+'" target="_blank" rel="noopener" style="color:var(--brand);font-weight:600">'+esc(hostOf(lien))+'</a></span></div>' : '')+
+      '<div class="kv"><span class="kv-k">Il y a</span><span class="kv-v">'+esc(v.since||'—')+'</span></div></div>';
+    visitAction = tplBtn('btn-g', CAL, 'Relancer', {
+      head:'Une relance part sur WhatsApp',
+      tpl:'slot_followup',
+      act:'slot_followup|'+l.id
+    });
+  } else {
+    visitAction = tplBtn('btn-p', CAL, 'Proposer une visite', {
+      head:'Ce message part sur WhatsApp',
+      tpl:'slot',
+      act:'slot|'+l.id
+    });
+  }
+
+  var handoverAction = l.handover
+    ? tplBtn('btn-g','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>','Main déjà reprise', {
+        head:'Attention',
+        warn:"Le client a été notifié qu'on le contacterait. Si ce n'est pas encore fait, appelez-le maintenant.",
+        off:true
+      })
+    : tplBtn('btn-g','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>','Reprendre la main', {
+        head:'À ne cliquer que si vous appelez tout de suite',
+        warn:"Le client reçoit immédiatement un message lui annonçant qu'un conseiller va le contacter. Ne cliquez pas si vous ne pouvez pas l'appeler rapidement.",
+        act:'handover|'+l.id
+      });
+
+  return '<button class="back" data-go="conversations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Conversations</button>'+
+  '<div class="dd-top"><span class="mono c1" style="width:52px;height:52px;font-size:16px">'+(l.name?mk(l.name):'?')+'</span>'+
+    '<div style="flex:1;min-width:200px"><div class="dd-ref">'+(l.name?esc(l.name):esc(l.phone))+'</div>'+
+    '<div class="dd-sub">'+(l.city?esc(l.city)+' · ':'')+'numéro '+esc(l.phone.slice(0,3))+' · premier contact le '+dstr(l.ts)+'</div>'+telLink(l.phone)+'</div>'+
+    (l.dia?'<span class="badge dia" style="height:22px">Diaspora'+(l.city?' · '+esc(l.city):'')+'</span>':'')+'</div>'+
+  '<div class="dd-grid"><div class="card"><div class="card-hd"><h3>Échange WhatsApp</h3><span class="micro">traité par Coumba</span></div>'+
+    '<div class="thread">'+
+      (l.thread ? threadHtml(l.thread) :
+      '<div class="msg in"><div><div class="msg-b">'+esc(l.last)+'</div><div class="msg-t">'+dstr(l.ts)+'</div></div></div>'+
+      '<div class="msg out"><div><div class="msg-b">Bonjour'+(l.name?' '+esc(l.name.split(' ')[0]):'')+'. Coumba, assistante de Résidences Atlantique — je suis un agent automatisé, un conseiller prendra le relais si besoin. Pour vous orienter au mieux : votre budget se situe dans quelle fourchette ?</div><div class="msg-t">41 s de délai</div></div></div>'+
+      '<div class="msg in"><div><div class="msg-b">'+esc(l.budget)+', je peux ajuster si le bien est bien placé.</div><div class="msg-t">+ 4 min</div></div></div>'+
+      '<div class="msg out"><div><div class="msg-b">Parfait. Voici la fiche complète avec la vidéo et le dossier juridique. Souhaitez-vous une visite '+(l.dia?'en visio avant votre retour ? Je peux caler un créneau à votre heure locale':'sur place cette semaine')+' ?</div><div class="msg-t">+ 5 min</div></div></div>')+
+    '</div></div>'+
+    '<div><div class="card"><div class="card-hd"><h3>Ce que Coumba a retenu</h3></div>'+
+      '<div class="kv"><span class="kv-k">Téléphone</span><span class="kv-v">'+esc(l.phone)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Budget</span><span class="kv-v">'+esc(l.budget)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Zone</span><span class="kv-v">'+esc(l.zone)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Type</span><span class="kv-v">'+esc(l.type)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Intention</span><span class="kv-v">'+esc(l.intent)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Échéance</span><span class="kv-v">'+esc(l.when)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Score</span><span class="kv-v"><span class="score">'+l.score+'</span></span></div>'+
+      (l.notes ? '<div class="kv" style="border-top:1px solid var(--line-2)"><span class="kv-k">Notes libres</span><span class="kv-v" style="font-weight:400;font-style:italic;max-width:62%">'+esc(l.notes)+'</span></div>' : '')+
+      '</div>'+
+      visitPanel+
+      '<div class="card acts"><div class="actions">'+visitAction+handoverAction+'</div></div>'+
+      '</div></div>';
+}
+
+function detailDossier(d){
+  return '<button class="back" data-go="dossiers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Dossiers</button>'+
+  '<div class="dd-top"><span class="mono c2" style="width:52px;height:52px;font-size:14px">'+esc(d.ref)+'</span>'+
+    '<div style="flex:1;min-width:200px"><div class="dd-ref">'+esc(d.subject)+'</div>'+
+    '<div class="dd-sub">'+esc(d.tenant)+' · ouvert le '+dstr(d.ts)+' par Malick</div>'+telLink(d.phone)+'</div>'+
+    '<span style="display:flex;align-items:center">'+urgBadge(d)+'</span></div>'+
+  (d.crit ? '<div class="safety"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>'+
+    '<div><b>Chemin de sécurité déclenché — '+esc(d.crit)+'</b><br>'+
+    "Malick a donné la consigne de sécurité, affiché les numéros d'urgence de l'agence et escaladé immédiatement vers un humain. Ce dossier n'a pas attendu dans une liste."+
+    '</div></div>' : '')+
+  '<div class="dd-grid"><div class="card"><div class="card-hd"><h3>Échange avec le locataire</h3><span class="micro">traité par Malick</span></div>'+
+    '<div class="thread">'+
+      (d.thread ? threadHtml(d.thread) :
+      '<div class="msg in"><div><div class="msg-b">Bonjour, '+esc(d.last.toLowerCase())+'</div><div class="msg-t">'+dstr(d.ts)+'</div></div></div>'+
+      '<div class="msg out"><div><div class="msg-b">Bonjour '+esc(d.tenant.split(' ')[0])+'. Malick, agent automatisé de Résidences Atlantique. Pour transmettre au bon technicien : depuis quand exactement, et le logement reste-t-il utilisable ?</div><div class="msg-t">'+esc(d.delay)+' de délai</div></div></div>'+
+      '<div class="msg in"><div><div class="msg-b">Depuis '+esc(d.since.toLowerCase())+'. Oui c\'est utilisable.'+(d.photos?'<div class="photos"><span class="ph"></span>'+(d.photos>1?'<span class="ph b"></span>':'')+'</div>':'')+'</div><div class="msg-t">+ 2 min</div></div></div>'+
+      '<div class="msg out"><div><div class="msg-b">C\'est noté. Le dossier n° '+esc(d.ref)+' est ouvert et transmis à l\'agence. Vous recevrez un message dès qu\'un créneau d\'intervention sera fixé.</div><div class="msg-t">+ 2 min</div></div></div>')+
+    '</div></div>'+
+    '<div><div class="card"><div class="card-hd"><h3>Fiche du dossier</h3></div>'+
+      '<div class="kv"><span class="kv-k">Référence</span><span class="kv-v">#'+esc(d.ref)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Bien, tel que déclaré</span><span class="kv-v" style="max-width:62%">'+esc(d.subject)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Nature</span><span class="kv-v">'+esc(d.nature)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Statut</span><span class="kv-v">'+esc(d.status)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Depuis</span><span class="kv-v">'+esc(d.since)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Locataire</span><span class="kv-v">'+esc(d.tenant)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Téléphone</span><span class="kv-v">'+esc(d.phone)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Pièces jointes</span><span class="kv-v">'+(d.photos||'aucune')+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Prise en charge</span><span class="kv-v">'+esc(d.delay)+'</span></div></div>'+
+      '<div class="card"><div class="card-hd"><h3>Faits établis par Malick</h3><span class="micro">questions fermées</span></div>'+
+        '<div class="kv"><span class="kv-k">Logement habitable</span><span class="kv-v">'+esc(d.habitable)+'</span></div>'+
+        '<div class="kv"><span class="kv-k">Coupure</span><span class="kv-v">'+esc(d.coupure)+'</span></div>'+
+        '<div class="kv"><span class="kv-k">Risque de sécurité</span><span class="kv-v">'+(d.risque?'Oui':'Non')+'</span></div>'+
+        '<div class="kv"><span class="kv-k">Situation qui s\'aggrave</span><span class="kv-v">'+(d.aggravation?'Oui':'Non')+'</span></div>'+
+        '<div class="kv" style="background:var(--surface-2)"><span class="kv-k">Niveau</span><span class="kv-v">'+
+          (function(){ var u=urgency(d);
+            var lbl = u.lvl==='securite'?'Sécurité':u.lvl==='urgent'?'Urgent':u.lvl==='faible'?'Faible':'Normal';
+            return lbl+(u.why?' — '+esc(u.why):'')+'<br><span style="font-weight:400;color:var(--ink-3);font-size:11.5px">'+
+              (u.forced?'forcé manuellement':'calculé depuis les faits ci-dessus')+'</span>'; })()+
+        '</span></div>'+
+        '<div class="actions" style="padding-top:var(--s4);border-top:1px solid var(--line-2)"><button class="btn btn-g" data-force="'+d.id+'" style="height:32px;font-size:12px">Forcer le niveau</button></div>'+
+      '</div>'+
+      '<div class="card acts"><div class="actions">'+
+        callBtn(d.phone, 'Appeler le locataire')+
+        (d.status==='Résolu'
+          ? '<button class="btn btn-g" data-tog="'+d.id+'">Rouvrir le dossier</button>'
+          : '<button class="btn btn-p" data-tog="'+d.id+'">Clore le dossier</button>')+
+      '</div></div></div></div>';
+}
+
+
+/* ── Rendu d'un fil de conversation ──
+   Un fil réel est rendu tel quel. À défaut, on reconstruit un échange type à partir
+   des champs du lead ou du dossier : c'est de la démonstration, pas de la donnée. */
+function msgHtml(m){
+  return '<div class="msg '+(m.d==='in'?'in':'out')+'"><div><div class="msg-b">'+esc(m.t)+
+    (m.photos ? '<div class="photos"><span class="ph"></span>'+(m.photos>1?'<span class="ph b"></span>':'')+'</div>' : '')+
+    '</div><div class="msg-t">'+esc(m.ts)+'</div></div></div>';
+}
+/* Au-delà de dix messages, les plus anciens sont repliés — comme dans WhatsApp.
+   Le bouton révèle de vrais messages, il ne fait pas semblant. */
+function threadHtml(arr){
+  if (arr.length <= 10) return arr.map(msgHtml).join('');
+  var vieux = arr.slice(0, arr.length - 8), recents = arr.slice(arr.length - 8);
+  return '<button class="older" data-older="1">Afficher les '+vieux.length+' messages plus anciens</button>'+
+    '<div id="older" style="display:none;flex-direction:column;gap:var(--s4)">'+vieux.map(msgHtml).join('')+'</div>'+
+    recents.map(msgHtml).join('');
+}
+
+/* ── Détail d'un bien ── */
+function pill(t, cls){ return '<span class="chip'+(cls?' '+cls:'')+'">'+esc(t)+'</span>'; }
+function kvOpt(k, v, todo){
+  if (v == null || v === '') return '<div class="kv"><span class="kv-k">'+k+'</span><span class="kv-v" style="color:var(--neg)">à confirmer</span></div>';
+  return '<div class="kv"><span class="kv-k">'+k+'</span><span class="kv-v">'+esc(String(v))+(todo?' <span style="color:var(--neg);font-weight:400">· à confirmer</span>':'')+'</span></div>';
+}
+function detailBien(b){
+  var todo = function(f){ return b.aconfirmer.indexOf(f) >= 0; };
+  return '<button class="back" data-go="biens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Nos biens</button>'+
+  '<div class="dd-top"><span class="mono c4" style="width:52px;height:52px;font-size:13px">'+esc(b.type.slice(0,2).toUpperCase())+'</span>'+
+    '<div style="flex:1;min-width:200px"><div class="dd-ref">'+esc(b.titre)+'</div>'+
+    '<div class="dd-sub">'+esc(b.ref)+' · '+esc(b.quartier)+', '+esc(b.ville)+' · '+esc(b.transaction)+'</div>'+
+    '<div style="font-family:var(--display);font-size:24px;margin-top:6px">'+esc(prix(b))+(b.charges?' <span style="font-family:var(--sans);font-size:12.5px;color:var(--ink-3)">'+esc(b.charges)+'</span>':'')+'</div></div>'+
+    '<span style="display:flex;align-items:center;gap:6px">'+
+      (b.status==='Publié'?'<span class="badge ok">Publié</span>':'<span class="badge nt">Dépublié</span>')+
+      (b.aconfirmer.length?'<span class="badge urg">'+b.aconfirmer.length+' à confirmer</span>':'')+
+    '</span></div>'+
+  (b.aconfirmer.length ? '<div class="safety" style="background:var(--accent-soft);border-color:var(--accent)">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>'+
+    "<div><b style=\"color:var(--accent)\">Amadou n'a pas pu tout extraire</b><br>Les champs marqués « à confirmer » n'apparaissaient pas dans l'annonce d'origine. Il ne les a pas inventés — complétez-les avant publication.</div></div>" : '')+
+  (linkState(b)==='aucun' ? '<div class="safety" style="background:var(--neg-soft);border-color:var(--neg)">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>'+
+    "<div><b>Aucun lien d'annonce</b><br>Coumba peut décrire ce bien, mais elle n'a rien à envoyer. Un acheteur qui demande « vous avez une fiche ? » repartira sans rien.</div></div>"
+   : linkState(b)==='place' ? '<div class="safety" style="background:var(--accent-soft);border-color:var(--accent)">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>'+
+    '<div><b style="color:var(--accent)">Cette fiche est hébergée sur '+esc(marketplaceName(b))+"</b><br>Coumba peut l'envoyer sans difficulté — techniquement, rien ne l'en empêche. Mais "+esc(marketplaceName(b))+' affiche les biens des autres agences à côté du vôtre : vous payez la relance, le prospect peut repartir en face. La même fiche sur '+esc(TENANT.domains[0])+' garde le lead chez vous.</div></div>' : '')+
+  '<div class="dd-grid"><div>'+
+    '<div class="card"><div class="card-hd"><h3>Caractéristiques</h3><span class="micro">champs contraints</span></div>'+
+      kvOpt('Type de bien', b.type)+
+      kvOpt('Typologie', b.typologie==='—'?null:b.typologie)+
+      kvOpt('Surface', b.surface? b.surface+' m²':null, todo('surface'))+
+      kvOpt('Pièces', b.pieces)+
+      kvOpt('Chambres', b.chambres)+
+      kvOpt("Salles d'eau", b.sdb)+
+      kvOpt('WC visiteurs', b.type==='Terrain'?'—':(b.wc_visiteurs?'Oui':'Non'))+
+      kvOpt('Étage', b.etage==='—'?null:b.etage)+
+      kvOpt('Ameublement', b.meuble==='—'?null:b.meuble, todo('meuble'))+
+      kvOpt('Disponibilité', dispoLabel(b))+
+      kvOpt('Publication', b.status==='Publié'?'Visible dans le catalogue':'Retiré du catalogue')+
+    '</div>'+
+    (b.equip.length || b.services.length ?
+    '<div class="card"><div class="card-hd"><h3>Équipements et services</h3></div>'+
+      (b.equip.length?'<div style="padding:0 var(--s4) var(--s3)"><div class="micro" style="margin-bottom:8px">Équipements</div><div class="chips" style="margin:0">'+b.equip.map(function(e){return pill(e)}).join('')+'</div></div>':'')+
+      (b.services.length?'<div style="padding:0 var(--s4) var(--s4)"><div class="micro" style="margin:var(--s3) 0 8px">Services inclus</div><div class="chips" style="margin:0">'+b.services.map(function(e){return pill(e)}).join('')+'</div></div>':'')+
+    '</div>' : '')+
+    (b.notes ? '<div class="card"><div class="card-hd"><h3>Notes libres</h3><span class="micro">hors champs contraints</span></div>'+
+      '<div style="padding:0 var(--s4) var(--s4);font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.65">'+esc(b.notes)+'</div></div>' : '')+
+    (b.brut ? '<div class="card"><div class="card-hd"><h3>Annonce d\'origine</h3><span class="micro">texte conservé brut</span></div>'+
+      '<div style="padding:0 var(--s4) var(--s4);font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.7;font-style:italic">'+esc(b.brut)+'</div></div>' : '')+
+  '</div><div>'+
+    '<div class="card"><div class="card-hd"><h3>Fiche</h3></div>'+
+      '<div class="kv"><span class="kv-k">Référence</span><span class="kv-v">'+esc(b.ref)+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Ajouté</span><span class="kv-v">'+(b.source==='URL'?'par Amadou depuis une URL':'via le formulaire')+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Lien envoyé par Coumba</span><span class="kv-v" style="max-width:62%;word-break:break-all">'+
+        (b.url ? '<a href="'+esc(b.url)+'" target="_blank" rel="noopener" style="color:var(--brand);font-weight:600">'+esc(hostOf(b.url))+'</a>'
+               : '<span style="color:var(--neg)">aucun</span>')+'</span></div>'+
+      '<div class="kv"><span class="kv-k">Fiche vue</span><span class="kv-v">'+b.vues+' fois</span></div>'+
+      '<div class="kv"><span class="kv-k">Leads générés</span><span class="kv-v">'+b.leads+'</span></div>'+
+    '</div>'+
+    '<div class="card acts"><div class="actions">'+
+      '<button class="btn btn-p" data-edit="'+b.id+'">Modifier</button>'+
+      (b.status==='Publié'?'<button class="btn btn-g" data-pub="'+b.id+'">Dépublier</button>':'<button class="btn btn-g" data-pub="'+b.id+'">Publier</button>')+
+    '</div></div>'+
+  '</div></div>';
+}
+
+/* ── Formulaire de bien : un seul écran, trois provenances ──
+   FORM = null            → création vierge
+   FORM = draft d'Amadou  → pré-rempli depuis une URL
+   FORM = bien existant   → modification                                   */
+var FORM = null, FORM_MISSING = [], FORM_EQUIP = [], FORM_SERV = [], FORM_MODE = 'new', FORM_REF = '', FORM_PUB = false;
+
+var AMADOU_DRAFT = {
+  "Titre du bien":"Appartement F4 à Mermoz, 1er étage", "Type":"Appartement",
+  "Transaction":"Location longue durée", "Typologie":"F4",
+  "Ville":"Dakar", "Quartier":"Mermoz",
+  "Surface (m²)":"", "Étage":"1er",
+  "Pièces":"5", "Chambres":"3",
+  "Salles d'eau":"3", "Ameublement":"",
+  "Prix":"1200000", "Périodicité":"mois",
+  "Charges":"Hors charges", "Disponibilité":"Disponible", "Disponible à partir du":"",
+  "Lien de l'annonce":"https://www.expat-dakar.com/annonce/appartement-f4-mermoz"
+};
+var AMADOU_MISSING = ["Surface (m²)", "Ameublement"];
+var AMADOU_EQUIP = ['Cuisine équipée','Four','Lave-vaisselle','Lave-linge','Balcon','Garage'];
+var AMADOU_SERV  = ['Gardiennage','Wifi inclus','Ménage'];
+
+var TODO_LABEL = { surface:"Surface (m²)", meuble:"Ameublement", prix:"Prix" };
+
+function bienToForm(b){
+  return {
+    "Titre du bien": b.titre,
+    "Type": b.type,
+    "Transaction": b.transaction,
+    "Typologie": b.typologie,
+    "Ville": b.ville,
+    "Quartier": b.quartier,
+    "Surface (m²)": b.surface == null ? '' : String(b.surface),
+    "Étage": b.etage === '—' ? '—' : b.etage,
+    "Pièces": b.pieces == null ? '' : String(b.pieces),
+    "Chambres": b.chambres == null ? '' : String(b.chambres),
+    "Salles d'eau": b.sdb == null ? '' : String(b.sdb),
+    "Ameublement": b.meuble || '',
+    "Prix": b.prix == null ? '' : String(b.prix),
+    "Périodicité": b.periode || '—',
+    "Charges": b.charges || '—',
+    "Disponibilité": b.dispo,
+    "Disponible à partir du": b.dispo_date || '',
+    "Lien de l'annonce": b.url || ''
+  };
+}
+function editBien(b){
+  FORM = bienToForm(b);
+  FORM_MISSING = b.aconfirmer.map(function(k){ return TODO_LABEL[k] || k; });
+  FORM_EQUIP = b.equip.slice();
+  FORM_SERV  = b.services.slice();
+  FORM_MODE = 'edit'; FORM_REF = b.ref; FORM_PUB = b.status === 'Publié';
+}
+function newBien(){ FORM = null; FORM_MISSING = []; FORM_EQUIP = []; FORM_SERV = []; FORM_MODE = 'new'; FORM_REF = ''; FORM_PUB = false; }
+function amadouFill(){
+  /* copie : le brouillon d'Amadou est un gabarit, on ne le modifie jamais en place */
+  FORM = {}; for (var k in AMADOU_DRAFT) FORM[k] = AMADOU_DRAFT[k];
+  FORM_MISSING = AMADOU_MISSING.slice();
+  FORM_EQUIP = AMADOU_EQUIP.slice(); FORM_SERV = AMADOU_SERV.slice();
+  FORM_MODE = 'amadou'; FORM_REF = ''; FORM_PUB = false;
+}
+
+function fld(label, kind, opts, attrs){
+  var v = FORM ? (FORM[label] == null ? '' : FORM[label]) : '';
+  var miss = FORM_MISSING.indexOf(label) >= 0 || (FORM && v === '' && FORM_MODE !== 'new');
+  var st = miss ? ' style="border-color:var(--neg)"' : '';
+  var a = attrs || '';
+  var input = kind === 'select'
+    ? '<select'+a+st+'>'+(opts||[]).map(function(o){ return '<option'+(String(o)===String(v)?' selected':'')+'>'+esc(o)+'</option>'; }).join('')+'</select>'
+    : '<input type="'+kind+'"'+a+st+' value="'+esc(v)+'">';
+  return '<label class="fld"><span>'+esc(label)+(miss?' <b style="color:var(--neg);font-weight:600">· à compléter</b>':'')+'</span>'+input+'</label>';
+}
+/* Interrupteur publié / dépublié. Deux états explicites, jamais déduits de la disponibilité. */
+function pubSwitch(){
+  return '<div class="pubsw">'+
+    '<button type="button" class="'+(FORM_PUB?'on':'')+'" data-pubset="1">Publié</button>'+
+    '<button type="button" class="'+(FORM_PUB?'':'on')+'" data-pubset="0">Dépublié</button>'+
+  '</div>';
+}
+function box(t, list){
+  var on = list.indexOf(t) >= 0;
+  return '<label class="chip" style="cursor:pointer'+(on?';background:var(--brand-soft);border-color:transparent;color:var(--brand);font-weight:600':'')+'">'+
+    '<input type="checkbox" style="margin-right:6px"'+(on?' checked':'')+'>'+esc(t)+'</label>';
+}
+
+/* Réglage de la prise de rendez-vous, sur la page de Coumba.
+   Un seul champ par défaut ; la case ouvre le second, parce que la location
+   et la vente sont rarement suivies par la même personne dans une agence. */
+function bookingCard(){
+  var s = BOOK.split;
+  return '<div class="card"><div class="card-hd"><h3>Prise de rendez-vous</h3><span class="micro">réglage de l\'agence</span></div>'+
+    '<div style="padding:0 var(--s4) var(--s4)">'+
+      '<p style="font-size:13.5px;color:var(--ink-2);font-weight:300;margin-bottom:var(--s4)">'+
+        "Quand un prospect veut visiter, Coumba lui envoie ce lien. <b style=\"font-weight:600;color:var(--ink)\">Sans lien, elle annonce qu'un conseiller le rappellera</b> pour convenir d'un créneau, et elle vous remonte la demande."+
+      '</p>'+
+      '<div class="formgrid" style="grid-template-columns:1fr">'+
+        '<label class="fld"><span id="bkLabel">'+(s?'Lien — location (visites sur place)':'Lien de prise de rendez-vous')+'</span>'+
+        '<input type="url" id="bkRental" placeholder="https://…" value="'+esc(BOOK.rental)+'"></label>'+
+      '</div>'+
+      '<label style="display:inline-flex;align-items:center;gap:8px;margin-top:var(--s4);font-size:13px;cursor:pointer">'+
+        '<input type="checkbox" data-split="1"'+(s?' checked':'')+'>Un lien différent pour l\'achat</label>'+
+      '<div class="formgrid" id="bkSale" style="grid-template-columns:1fr;margin-top:var(--s3)'+(s?'':';display:none')+'">'+
+        '<label class="fld"><span>Lien — achat (visite en visio)</span>'+
+        '<input type="url" id="bkSaleUrl" placeholder="https://…" value="'+esc(BOOK.sale)+'"></label>'+
+      '</div>'+
+      '<p style="font-size:12.5px;color:var(--ink-3);font-weight:300;line-height:1.6;margin-top:var(--s3)">'+
+        "Dans une agence, la location et la vente sont rarement suivies par la même personne. Deux liens, ce sont deux agendas et deux collègues — et un acheteur depuis Paris n'atterrit pas dans les créneaux de visite sur place."+
+      '</p>'+
+    '</div></div>';
+}
+
+function vAjout(){
+  var edit = FORM_MODE === 'edit';
+  return '<button class="back" data-go="biens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg> Nos biens</button>'+
+  '<div class="pagehead"><div><div class="micro">'+(edit?'Modification · '+esc(FORM_REF):'Amadou · agent catalogue')+'</div>'+
+    '<h1>'+(edit?'Modifier le bien':'Ajouter un bien')+'</h1></div></div>'+
+  '<div class="dd-grid"><div>'+
+
+    (edit ? '' :
+    '<div class="card"><div class="card-hd"><h3>Pré-remplir depuis une annonce en ligne</h3><span class="micro">facultatif</span></div>'+
+      '<div style="padding:0 var(--s4) var(--s4)">'+
+        "<p style=\"font-size:13.5px;color:var(--ink-2);font-weight:300;margin-bottom:var(--s4)\">Collez l'adresse d'une de <b style=\"font-weight:600;color:var(--ink)\">vos</b> annonces. Amadou la lit et remplit le formulaire ci-dessous à votre place. Vous relisez, vous corrigez, vous enregistrez.</p>"+
+        '<div style="display:flex;gap:var(--s2);flex-wrap:wrap">'+
+          '<input type="url" id="fetchurl" placeholder="https://…" value="https://www.expat-dakar.com/annonce/appartement-f4-mermoz" style="flex:1;min-width:220px;height:40px;padding:0 13px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:13.5px">'+
+          '<button class="btn '+(FORM_MODE==='amadou'?'btn-g':'btn-p')+'" data-fetch="'+(FORM_MODE==='amadou'?'0':'1')+'">'+(FORM_MODE==='amadou'?'Vider le formulaire':'Lancer Amadou')+'</button>'+
+        '</div></div></div>')+
+
+    (FORM_MODE==='amadou' ? '<div class="safety" style="background:var(--third-soft);border-color:var(--third);margin-top:var(--s4)">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--third)"><path d="M20 6 9 17l-5-5"/></svg>'+
+      "<div><b style=\"color:var(--third)\">Amadou a rempli le formulaire</b><br>Deux champs ne figuraient pas dans l'annonce — <b>la surface</b> et <b>l'ameublement</b>. Il les a laissés vides plutôt que de les deviner. Complétez-les avant d'enregistrer.</div></div>" : '')+
+
+    (edit && FORM_MISSING.length ? '<div class="safety" style="background:var(--accent-soft);border-color:var(--accent)">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="color:var(--accent)"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>'+
+      '<div><b style="color:var(--accent)">'+FORM_MISSING.length+' champ'+(FORM_MISSING.length>1?'s':'')+" à compléter</b><br>Ce bien ne pourra pas être publié tant que ces champs sont vides.</div></div>" : '')+
+
+    '<div class="card" style="margin-top:var(--s4)"><div class="card-hd"><h3>Publication</h3><span class="micro">indépendant de la disponibilité</span></div>'+
+      '<div style="padding:0 var(--s4) var(--s4)">'+
+        pubSwitch()+
+        '<p style="font-size:12.5px;color:var(--ink-3);font-weight:300;line-height:1.6;margin-top:var(--s3)">'+
+          "Publier rend la fiche visible dans le catalogue et permet à Coumba de la proposer. C'est un choix à part : un bien peut être publié alors qu'il ne se libère qu'à une date future, ou dépublié alors qu'il est libre."+
+        '</p>'+
+      '</div></div>'+
+
+    '<div class="card" style="margin-top:var(--s4)"><div class="card-hd"><h3>Fiche du bien</h3><span class="micro">champs contraints</span></div>'+
+      '<div style="padding:0 var(--s4) var(--s4)">'+
+        '<div class="formgrid">'+
+          fld('Titre du bien','text')+fld('Type','select',['Appartement','Villa','Terrain','Local commercial','À qualifier'])+
+          fld('Transaction','select',['Vente','Location longue durée','Location courte durée'])+fld('Typologie','select',['—','Studio','F1','F2','F3','F4','F5','F6+'])+
+          fld('Ville','text')+fld('Quartier','text')+
+          fld('Surface (m²)','number')+fld('Étage','text')+
+          fld('Pièces','number')+fld('Chambres','number')+
+          fld("Salles d'eau",'number')+fld('Ameublement','select',['','—','À qualifier','Meublé','Non meublé','Partiellement'])+
+          fld('Prix','number')+fld('Périodicité','select',['—','mois','semaine','nuit'])+
+          fld('Charges','select',['—','Hors charges','Charges comprises'])+
+          fld('Disponibilité','select',['Disponible','À partir du…'],' data-dispo="1"')+
+        '</div>'+
+        '<div class="formgrid" id="dispodate" style="margin-top:var(--s3)'+(FORM && FORM['Disponibilité']==='À partir du…' ? '' : ';display:none')+'">'+
+          fld('Disponible à partir du','date',null,' data-dispodate="1"')+
+        '</div>'+
+        '<div class="formgrid" style="grid-template-columns:1fr;margin-top:var(--s3)">'+
+          fld("Lien de l'annonce",'url')+
+        '</div>'+
+        '<p style="font-size:12.5px;color:var(--ink-3);font-weight:300;line-height:1.6;margin-top:var(--s2)">'+
+          "C'est l'adresse que Coumba envoie à un acheteur qui demande la fiche. "+
+          (FORM_MODE==='amadou' ? "Elle est reprise de l'adresse que vous venez de donner à Amadou — changez-la si la fiche publique est ailleurs. " : '')+
+          'N\'importe quelle adresse fonctionne. À qualité égale, une page de <b style="font-weight:600;color:var(--ink)">'+esc(TENANT.domains[0])+"</b> vaut mieux qu'une annonce sur une place de marché, qui affiche les biens des autres agences à côté du vôtre."+
+        '</p>'+
+        '<div class="micro" style="margin:var(--s5) 0 var(--s3)">Équipements</div>'+
+        '<div class="chips" style="margin:0">'+['Cuisine équipée','Four','Lave-vaisselle','Lave-linge','Climatisation','Balcon','Terrasse','Garage','Ascenseur','Piscine','Jardin','Groupe électrogène'].map(function(t){return box(t, FORM_EQUIP)}).join('')+'</div>'+
+        '<div class="micro" style="margin:var(--s4) 0 var(--s3)">Services inclus</div>'+
+        '<div class="chips" style="margin:0">'+['Gardiennage','Wifi inclus','Ménage','Eau incluse','Électricité incluse','Espaces communs'].map(function(t){return box(t, FORM_SERV)}).join('')+'</div>'+
+        '<div class="actions" style="padding:var(--s5) 0 0"><button class="btn btn-p">'+(edit?'Enregistrer les modifications':'Enregistrer en brouillon')+'</button><button class="btn btn-g" data-go="biens">Annuler</button></div>'+
+      '</div></div>'+
+
+  '</div><div>'+
+    "<div class=\"card\"><div class=\"card-hd\"><h3>Pourquoi le catalogue d'abord</h3></div>"+
+    '<div style="padding:0 var(--s4) var(--s4);font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.65">'+
+      "Coumba ne peut rien proposer à un acheteur tant que le catalogue est vide : elle répond vite, mais elle répond dans le vide. C'est le premier écran à remplir après l'installation."+
+      '<div style="margin-top:var(--s4);padding-top:var(--s4);border-top:1px solid var(--line-2)">'+
+      "<b style=\"color:var(--ink);font-weight:600\">Amadou ne lit que vos annonces.</b> Récupérer automatiquement celles d'une autre agence poserait un problème de droits et de données personnelles."+
+      '</div></div></div>'+
+  '</div></div>';
+}
+
+/* ═══════════ RENDU ═══════════ */
+var PARENT = { dash:'dash', conversations:'conversations', leads:'leads', visites:'visites', dossiers:'dossiers',
+               biens:'biens', ajout:'biens', coumba:'coumba', malick:'malick', amadou:'amadou' };
+var current = 'dash', currentParent = 'dash';
+
+function renderLists(){
+  document.getElementById('v-conversations').innerHTML = vConversations();
+  document.getElementById('v-leads').innerHTML = vLeads();
+  document.getElementById('v-dossiers').innerHTML = vDossiers();
+  document.getElementById('v-visites').innerHTML = vVisites();
+  document.getElementById('v-biens').innerHTML = vBiens();
+  document.getElementById('v-ajout').innerHTML = vAjout();
+  document.getElementById('amadouList').innerHTML =
+    BIENS.filter(function(b){ return b.aconfirmer.length; }).map(rowBien).join('') ||
+    '<div class="empty">Tous les biens sont complets.</div>';
+
+  var att = CONVS.slice().sort(function(a,b){return a.ts<b.ts?1:-1}).slice(0,3);
+  document.getElementById('attention').innerHTML = att.map(rowConv).join('');
+  document.getElementById('coumbaBooking').innerHTML = bookingCard();
+  document.getElementById('coumbaList').innerHTML = CONVS.filter(function(c){return c.kind==='lead'}).slice(0,3).map(rowConv).join('');
+  document.getElementById('coumbaLeads').innerHTML = LEADS.slice().sort(function(a,b){return b.score-a.score}).slice(0,3).map(rowLead).join('');
+  document.getElementById('malickList').innerHTML = DOSSIERS.filter(function(d){return d.status!=='Résolu'}).map(rowDos).join('');
+
+  document.getElementById('nowList').innerHTML =
+    '<button class="nowitem" data-open="l1"><span class="pulse an" style="background:var(--brand);color:var(--brand)"></span><span><b>Coumba</b> échange avec Mamadou Diallo</span></button>'+
+    '<button class="nowitem" data-open="l5"><span class="pulse an" style="background:var(--brand);color:var(--brand)"></span><span><b>Coumba</b> échange avec <span class="row-phone">+33 6 12 77 40 92</span></span></button>'+
+    '<button class="nowitem" data-open="d248"><span class="pulse an" style="background:var(--accent);color:var(--accent)"></span><span><b>Malick</b> attend une photo de F. Ndour</span></button>'+
+    '<button class="nowitem" style="cursor:default"><span class="pulse" style="background:var(--ink-3)"></span><span><b>Sokhna</b> n\'est pas encore activée</span></button>';
+
+  document.getElementById('cCon').textContent = CONVS.length;
+  document.getElementById('cLead').textContent = LEADS.length;
+  document.getElementById('cVis').textContent = VISITES.length;
+  document.getElementById('cDos').textContent = DOSSIERS.filter(function(d){return d.status!=='Résolu'}).length;
+  document.getElementById('cBien').textContent = BIENS.length;
+  bind();
+}
+
+function show(view, parent){
+  current = view; currentParent = parent || PARENT[view] || view;
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.toggle('on', v.id === 'v-'+view); });
+  document.querySelectorAll('.side .nav').forEach(function(n){ n.classList.toggle('on', n.dataset.go === currentParent); });
+  side.classList.remove('open'); scrim.classList.remove('on');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function open(id){
+  var l = LEADS.filter(function(x){return x.id===id})[0];
+  var d = DOSSIERS.filter(function(x){return x.id===id})[0];
+  var b = BIENS.filter(function(x){return x.id===id})[0];
+  var el = document.getElementById('v-detail');
+  if (l) { el.innerHTML = detailLead(l); show('detail','conversations'); }
+  else if (d) { el.innerHTML = detailDossier(d); show('detail','dossiers'); }
+  else if (b) { el.innerHTML = detailBien(b); show('detail','biens'); }
+  bind();
+  var t = el.querySelector('.thread'); if (t) t.scrollTop = t.scrollHeight;
+}
+
+function bind(){
+  document.querySelectorAll('[data-go]').forEach(function(el){
+    el.onclick = function(e){ e.stopPropagation(); show(el.dataset.go); };
+  });
+  document.querySelectorAll('[data-open]').forEach(function(el){
+    el.onclick = function(e){ e.stopPropagation(); open(el.dataset.open); };
+  });
+  /* Bouton d'appel : sur ordinateur, révéler le numéro plutôt que composer */
+  document.querySelectorAll('[data-call]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      if (TOUCH) return;               // mobile : on laisse tel: composer
+      e.preventDefault();
+      var n = el.dataset.call;
+      el.innerHTML = PHONE_SVG + ' ' + n;
+      if (navigator.clipboard) navigator.clipboard.writeText(n).catch(function(){});
+    };
+  });
+
+  /* Forcer le niveau d'urgence — tracé, comme l'exige la spec */
+  document.querySelectorAll('[data-force]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      var d = DOSSIERS.filter(function(x){ return x.id === el.dataset.force; })[0];
+      if (!d) return;
+      var cycle = [null, 'urgent', 'normal', 'faible'];
+      d.forced = cycle[(cycle.indexOf(d.forced || null) + 1) % cycle.length];
+      renderLists(); open(d.id);
+    };
+  });
+
+  /* Clore / rouvrir un dossier */
+  document.querySelectorAll('[data-tog]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      var d = DOSSIERS.filter(function(x){ return x.id === el.dataset.tog; })[0];
+      if (!d) return;
+      d.status = d.status === 'Résolu' ? 'Ouvert' : 'Résolu';
+      renderLists(); open(d.id);
+    };
+  });
+
+  /* Actions qui envoient un message : elles changent l'état du dossier */
+  document.querySelectorAll('[data-act]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      var p = el.dataset.act.split('|'), kind = p[0], id = p[1];
+      var l = LEADS.filter(function(x){return x.id===id})[0];
+      if (!l) return;
+      var v = VISITES.filter(function(x){return x.lead===id})[0];
+      if (kind === 'handover') l.handover = true;
+      if (kind === 'slot') {
+        var intent = l.intent === 'Location' ? 'Location' : 'Achat';
+        var mode = bookingUrl(intent) ? 'link' : 'callback';
+        if (v) { v.mode = mode; v.since = "à l'instant"; }
+        else VISITES.push({ id:'v'+Date.now(), prop:l.prop, lead:id, intent:intent,
+                            mode:mode, since:"à l'instant", ts:'' });
+      }
+      if (kind === 'slot_followup' && v) v.since = "à l'instant";
+      renderLists(); open(id);
+    };
+  });
+  document.querySelectorAll('[data-older]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      var box = document.getElementById('older');
+      if (box) { box.style.display = 'flex'; el.style.display = 'none'; }
+    };
+  });
+  document.querySelectorAll('[data-pg]').forEach(function(el){
+    el.onclick = function(){ var p = el.dataset.pg.split('|'); PAGE[p[0]] = +p[1]; renderLists(); show(current, currentParent); };
+  });
+  document.querySelectorAll('[data-f]').forEach(function(el){
+    el.onclick = function(){ SORT.convFilter = el.dataset.f; PAGE.convs = 1; renderLists(); show('conversations'); };
+  });
+  document.querySelectorAll('[data-s]').forEach(function(el){
+    el.onclick = function(){ SORT.convs = el.dataset.s; PAGE.convs = 1; renderLists(); show('conversations'); };
+  });
+  document.querySelectorAll('[data-split]').forEach(function(el){
+    el.onchange = function(){
+      BOOK.split = el.checked;
+      var box = document.getElementById('bkSale');
+      if (box) box.style.display = el.checked ? 'grid' : 'none';
+      var lbl = document.getElementById('bkLabel');
+      if (lbl) lbl.textContent = el.checked ? 'Lien — location (visites sur place)' : 'Lien de prise de rendez-vous';
+    };
+  });
+  document.querySelectorAll('[data-pubset]').forEach(function(el){
+    el.onclick = function(){
+      FORM_PUB = el.dataset.pubset === '1';
+      /* Bascule sur place : re-rendre le formulaire effacerait la saisie en cours. */
+      document.querySelectorAll('.pubsw button').forEach(function(x){
+        x.classList.toggle('on', (x.dataset.pubset === '1') === FORM_PUB);
+      });
+    };
+  });
+  document.querySelectorAll('[data-pub]').forEach(function(el){
+    el.onclick = function(){
+      var b = BIENS.filter(function(x){return x.id===el.dataset.pub})[0];
+      if (b) { b.status = b.status === 'Publié' ? 'Dépublié' : 'Publié'; renderLists(); open(b.id); }
+    };
+  });
+  /* La date n'apparaît que si elle a un sens. On bascule sans re-rendre : la saisie en cours est préservée. */
+  document.querySelectorAll('[data-dispo]').forEach(function(el){
+    el.onchange = function(){
+      var box = document.getElementById('dispodate');
+      if (box) box.style.display = el.value === 'À partir du…' ? '' : 'none';
+    };
+  });
+  document.querySelectorAll('[data-bf]').forEach(function(el){
+    el.onclick = function(){ BFILTER = el.dataset.bf; PAGE.biens = 1; renderLists(); show('biens'); };
+  });
+  document.querySelectorAll('[data-fetch]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      /* Le lien donné à Amadou devient par défaut le lien de l'annonce : c'est la même page. */
+      var src = document.getElementById('fetchurl');
+      if (+el.dataset.fetch) { amadouFill(); if (src && src.value) FORM["Lien de l'annonce"] = src.value; }
+      else newBien();
+      renderLists(); show('ajout');
+    };
+  });
+  document.querySelectorAll('[data-new]').forEach(function(el){
+    el.onclick = function(e){ e.stopPropagation(); newBien(); renderLists(); show('ajout'); };
+  });
+  document.querySelectorAll('[data-edit]').forEach(function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      var b = BIENS.filter(function(x){ return x.id === el.dataset.edit; })[0];
+      if (!b) return;
+      editBien(b); renderLists(); show('ajout');
+    };
+  });
+  document.querySelectorAll('[data-ls]').forEach(function(el){
+    el.onclick = function(){ SORT.leads = el.dataset.ls; PAGE.leads = 1; renderLists(); show('leads'); };
+  });
+  document.querySelectorAll('.theme').forEach(function(b){
+    b.onclick = function(){
+      var r = document.documentElement;
+      var cur = r.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light');
+      r.setAttribute('data-theme', cur==='dark'?'light':'dark'); draw();
+    };
+  });
+}
+
+var side = document.getElementById('side'), scrim = document.getElementById('scrim');
+document.getElementById('openNav').onclick = function(){ side.classList.add('open'); scrim.classList.add('on'); };
+document.getElementById('closeNav').onclick = function(){ side.classList.remove('open'); scrim.classList.remove('on'); };
+scrim.onclick = function(){ side.classList.remove('open'); scrim.classList.remove('on'); };
+addEventListener('keydown', function(e){ if(e.key==='Escape'){ side.classList.remove('open'); scrim.classList.remove('on'); } });
+
+/* ═══════════ GRAPHE ═══════════ */
+var DATA = [{d:'Mer',v:58},{d:'Jeu',v:49},{d:'Ven',v:44},{d:'Sam',v:51},{d:'Dim',v:38},{d:'Lun',v:33},{d:'Mar',v:41}];
+var W=560,H=190,PL=34,PR=14,PT=22,PB=26;
+var svg=document.getElementById('chart'), tip=document.getElementById('tip'), wrap=document.getElementById('chartWrap');
+var ix=function(i){return PL+i*(W-PL-PR)/(DATA.length-1)}, iy=function(v){return PT+(1-v/70)*(H-PT-PB)};
+function draw(){
+  var s='';
+  [0,20,40,60].forEach(function(t){
+    s+='<line class="gridline" x1="'+PL+'" y1="'+iy(t)+'" x2="'+(W-PR)+'" y2="'+iy(t)+'"/>';
+    s+='<text class="axis-t" x="'+(PL-8)+'" y="'+(iy(t)+3.5)+'" text-anchor="end">'+t+'</text>';
+  });
+  var line=DATA.map(function(p,i){return (i?'L':'M')+ix(i)+' '+iy(p.v)}).join(' ');
+  s+='<path class="serie-fill" d="'+line+' L'+ix(DATA.length-1)+' '+iy(0)+' L'+ix(0)+' '+iy(0)+' Z"/><path class="serie" d="'+line+'"/>';
+  DATA.forEach(function(p,i){
+    var last=i===DATA.length-1;
+    s+='<circle class="'+(last?'pt-last':'pt')+'" cx="'+ix(i)+'" cy="'+iy(p.v)+'" r="'+(last?5:4)+'"/>';
+    s+='<text class="axis-t" x="'+ix(i)+'" y="'+(H-6)+'" text-anchor="middle">'+p.d+'</text>';
+  });
+  var lp=DATA[DATA.length-1];
+  s+='<text class="dlabel" x="'+(ix(DATA.length-1)-6)+'" y="'+(iy(lp.v)-13)+'" text-anchor="end">'+lp.v+' s</text>';
+  s+='<line class="crosshair" id="ch" x1="0" y1="'+PT+'" x2="0" y2="'+(H-PB)+'"/>';
+  DATA.forEach(function(p,i){ var w=(W-PL-PR)/(DATA.length-1); s+='<rect class="hitzone" data-i="'+i+'" x="'+(ix(i)-w/2)+'" y="0" width="'+w+'" height="'+H+'"/>'; });
+  svg.innerHTML=s;
+  var ch=svg.querySelector('#ch');
+  svg.querySelectorAll('.hitzone').forEach(function(z){
+    z.addEventListener('mouseenter', function(){
+      var i=+z.dataset.i,p=DATA[i];
+      ch.setAttribute('x1',ix(i)); ch.setAttribute('x2',ix(i)); ch.style.opacity='.65';
+      var r=wrap.getBoundingClientRect(), sr=svg.getBoundingClientRect();
+      tip.innerHTML=p.d+' · <b>'+p.v+' s</b>';
+      tip.style.left=(sr.left-r.left+ix(i)/W*sr.width)+'px';
+      tip.style.top=(sr.top-r.top+iy(p.v)/H*sr.height)+'px';
+      tip.style.opacity='1';
+    });
+  });
+  wrap.addEventListener('mouseleave', function(){ ch.style.opacity='0'; tip.style.opacity='0'; });
+}
+
+renderLists(); draw(); addEventListener('resize', draw);
+})();
+</script>
