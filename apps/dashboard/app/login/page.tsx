@@ -2,13 +2,14 @@
  * Connexion — numéro de téléphone + mot de passe. Pas d'inscription en
  * libre-service : les comptes sont créés à l'onboarding
  * (`pnpm ops:onboard`, `pnpm ops:user` — packages/ops). Avant connexion on ne sait pas de
- * quelle agence il s'agit : marque Codaya.
+ * quelle agence il s'agit : marque du produit (lib/brand.ts).
  */
 import { redirect } from 'next/navigation'
 import { ActionForm } from '@/components/ActionForm'
 import { PhoneField } from '@/components/PhoneField'
 import { SubmitButton } from '@/components/SubmitButton'
 import { loginAction } from '@/lib/auth-actions'
+import { brandOf } from '@/lib/brand'
 import { getOptionalSession } from '@/lib/session'
 
 const ERRORS: Record<string, string> = {
@@ -21,14 +22,16 @@ const ERRORS: Record<string, string> = {
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (await getOptionalSession()) redirect('/')
   const { error } = await searchParams
+  const brand = brandOf(null)
 
   return (
     <main className="login">
       <div className="brandblock" style={{ marginBottom: 24 }}>
-        <div className="brandmark">C</div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- logo statique, déjà à la bonne taille */}
+        <img className="brandmark" src="/keurbi-logo.png" alt="" width={40} height={40} style={{ width: 40, height: 40 }} />
         <div>
-          <div className="brandname">Codaya</div>
-          <div className="brandsub">de l&apos;IA dans votre agence</div>
+          <div className="brandname">{brand.title} by Codaya</div>
+          <div className="brandsub">{brand.subtitle}</div>
         </div>
       </div>
 
