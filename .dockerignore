@@ -1,0 +1,15 @@
+# Rien de secret ni de lourd dans l'image du worker.
+**/node_modules
+**/.next
+**/dist
+**/*.tsbuildinfo
+.git
+.env
+.env.*
+!.env.example
+onboarding
+prospection
+docs
+**/scripts_tmp_*
+*.log
+.DS_Store
