@@ -40,10 +40,22 @@ function isStoredMessageArray(value: unknown): value is Anthropic.MessageParam[]
   return Array.isArray(value) && value.every((m) => m && typeof m === 'object' && 'role' in m && 'content' in m)
 }
 
+/** Une trace doit commencer par un message du client, jamais par un
+ *  `tool_result` dont le `tool_use` a été coupé : l'API rejette alors toute la
+ *  requête (400), et comme la trace cassée est réenregistrée à chaque tour, la
+ *  conversation ne répondait plus que par le message de repli — arrivé en
+ *  test sur une conversation de locataire passée au-delà de 40 messages. */
+export function trimToCleanStart(messages: Anthropic.MessageParam[]): Anthropic.MessageParam[] {
+  const start = messages.findIndex((m) =>
+    m.role === 'user'
+    && (typeof m.content === 'string' || m.content.every((b) => b.type !== 'tool_result')))
+  return start === -1 ? [] : messages.slice(start)
+}
+
 /** L'état persisté doit refléter ce que le client a VRAIMENT reçu — pas le
  *  brouillon interne du modèle quand il a été remplacé par un repli. */
 function finalizeState(messages: Anthropic.MessageParam[], sentText: string): Anthropic.MessageParam[] {
-  return [...messages, { role: 'assistant' as const, content: sentText }].slice(-MAX_STATE_MESSAGES)
+  return trimToCleanStart([...messages, { role: 'assistant' as const, content: sentText }].slice(-MAX_STATE_MESSAGES))
 }
 
 export interface AgentLoopInput {
@@ -73,8 +85,10 @@ export async function runAgentLoop(params: AgentLoopInput): Promise<AgentTurnRes
   // sans ça, l'agent « oublie » l'id qu'il vient de trouver dès le message
   // suivant. `history` (texte seul, reconstruit depuis messages) ne sert
   // qu'au tout premier tour.
+  // trimToCleanStart aussi à la lecture : il répare les traces déjà
+  // enregistrées cassées, sans migration.
   const base: Anthropic.MessageParam[] = isStoredMessageArray(params.priorState)
-    ? params.priorState
+    ? trimToCleanStart(params.priorState)
     : params.history
       .filter((m) => m.body)
       .map((m): Anthropic.MessageParam => ({
