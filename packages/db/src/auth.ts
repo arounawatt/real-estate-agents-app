@@ -9,6 +9,7 @@ import { createHash, randomBytes, scrypt, timingSafeEqual } from 'node:crypto'
 import { promisify } from 'node:util'
 import { and, eq, gt, isNull, lt, ne } from 'drizzle-orm'
 import { db } from './client.js'
+import { tenantAccess } from './queries.js'
 import { agencyUsers, sessions, tenants } from './schema.js'
 
 const scryptAsync = promisify(scrypt) as (pw: string, salt: Buffer, len: number) => Promise<Buffer>
@@ -43,7 +44,7 @@ function tokenHash(token: string) {
 
 export type LoginResult =
   | { ok: true; token: string; expiresAt: Date }
-  | { ok: false; reason: 'invalid' | 'locked' | 'suspended' }
+  | { ok: false; reason: 'invalid' | 'locked' | 'suspended' | 'expired' }
 
 export async function login(whatsappNumber: string, password: string): Promise<LoginResult> {
   const [user] = await db.select().from(agencyUsers).where(eq(agencyUsers.whatsappNumber, whatsappNumber)).limit(1)
@@ -65,9 +66,12 @@ export async function login(whatsappNumber: string, password: string): Promise<L
 
   // Vérifié APRÈS le mot de passe : sinon la page de connexion révélerait à
   // n'importe qui qu'un numéro appartient à une agence suspendue.
-  const [tenant] = await db.select({ disabledAt: tenants.disabledAt }).from(tenants)
+  const [tenant] = await db.select({ disabledAt: tenants.disabledAt, untilAt: tenants.untilAt }).from(tenants)
     .where(eq(tenants.id, user.tenantId)).limit(1)
-  if (!tenant || tenant.disabledAt) return { ok: false, reason: 'suspended' }
+  if (!tenant) return { ok: false, reason: 'suspended' }
+  const access = tenantAccess(tenant)
+  if (access === 'disabled') return { ok: false, reason: 'suspended' }
+  if (access === 'expired') return { ok: false, reason: 'expired' }
 
   const token = randomBytes(32).toString('base64url')
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS)
@@ -81,6 +85,7 @@ export async function login(whatsappNumber: string, password: string): Promise<L
 }
 
 export async function getSessionByToken(token: string) {
+  const now = new Date()
   const [row] = await db.select({
     tenantId: sessions.tenantId,
     agencyUserId: sessions.agencyUserId,
@@ -89,9 +94,10 @@ export async function getSessionByToken(token: string) {
   })
     .from(sessions)
     .innerJoin(agencyUsers, eq(agencyUsers.id, sessions.agencyUserId))
-    // Une agence désactivée perd l'accès immédiatement, sessions ouvertes comprises.
-    .innerJoin(tenants, and(eq(tenants.id, sessions.tenantId), isNull(tenants.disabledAt)))
-    .where(and(eq(sessions.tokenHash, tokenHash(token)), gt(sessions.expiresAt, new Date())))
+    // Une agence désactivée ou arrivée en fin d'accès perd l'accès
+    // immédiatement, sessions ouvertes comprises (même règle que tenantAccess).
+    .innerJoin(tenants, and(eq(tenants.id, sessions.tenantId), isNull(tenants.disabledAt), gt(tenants.untilAt, now)))
+    .where(and(eq(sessions.tokenHash, tokenHash(token)), gt(sessions.expiresAt, now)))
     .limit(1)
   return row ?? null
 }

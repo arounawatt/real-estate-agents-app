@@ -52,6 +52,8 @@ async function main() {
     plan: 'complete',
     listingDomains: ['residences-atlantique.sn'],
     bookingUrlRental: 'https://calendly.com/residences-atlantique/visite',
+    // Agence de test : un an d'accès, pas les 31 jours d'un nouveau client.
+    untilAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
   }).returning()
   if (!tenant) throw new Error('Échec de création du tenant')
 

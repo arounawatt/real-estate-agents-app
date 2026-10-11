@@ -12,7 +12,7 @@ import {
   createEscalation, findOrCreateContact, findOrCreateConversation, findOrCreateLead,
   getAgencyUserByWhatsapp, getLead, getTenant, getThreadByContactAndProfile,
   getWhatsappAccountByPhoneNumberId, listOpenTicketsForContact, listPublishedPrices,
-  recordInboundMedia, recordInboundMessage, recordOutboundMessage, updateConversationAgentState,
+  recordInboundMedia, recordInboundMessage, recordOutboundMessage, tenantAccess, updateConversationAgentState,
 } from '@codaya/db'
 import {
   buildIntroduction, ensureSafetyNotice, withIntroduction, withVideoNotice, ESCALATION_FALLBACK_MESSAGE, routeProfile,
@@ -121,10 +121,12 @@ async function processMessage(account: Account, value: MetaWebhookValue, message
     await recordInboundMessage(tenantId, conversation.id, message.text!.body, message.id)
   }
 
-  if (tenant.disabledAt) {
-    // Agence désactivée (pnpm ops:tenant-status) : le message est conservé —
-    // rien n'est perdu si elle est réactivée — mais aucun agent ne répond.
-    console.log(`Agence ${tenantId} désactivée — message conservé sans réponse.`)
+  const access = tenantAccess(tenant)
+  if (access !== 'active') {
+    // Agence désactivée ou en fin d'accès (pnpm ops:tenant-status) : le
+    // message est conservé — rien n'est perdu si l'accès est rétabli — mais
+    // aucun agent ne répond.
+    console.log(`Agence ${tenantId} ${access === 'expired' ? 'en fin d\'accès' : 'désactivée'} — message conservé sans réponse.`)
     return
   }
 

@@ -8,7 +8,7 @@
  */
 import { parseArgs } from 'node:util'
 import { db } from '@codaya/db'
-import { generatePassword, insertTenant, OpsError, parsePhone, PLANS, run, upsertAgencyUser } from './shared.js'
+import { formatDate, generatePassword, insertTenant, OpsError, parsePhone, PLANS, run, upsertAgencyUser } from './shared.js'
 
 run(async () => {
   const { values } = parseArgs({
@@ -20,17 +20,18 @@ run(async () => {
   if (!PLANS.includes(plan)) throw new OpsError(`--plan doit valoir ${PLANS.join(' ou ')}.`)
   const password = generatePassword()
 
-  const tenantId = await db.transaction(async (tx) => {
-    const id = await insertTenant(tx, {
+  const { id: tenantId, untilAt } = await db.transaction(async (tx) => {
+    const created = await insertTenant(tx, {
       name: values.name?.trim() || null, plan, listingDomains: [], bookingUrlRental: null, bookingUrlSale: null,
       splitBookingLinks: false, disclosureLevel: 'neighbourhood', emergencyNumbers: null,
     })
-    await upsertAgencyUser(tx, id, { waId, fullName: values['admin-name'] ?? null, password })
-    return id
+    await upsertAgencyUser(tx, created.id, { waId, fullName: values['admin-name'] ?? null, password })
+    return created
   })
 
   console.log(`\n✓ Agence créée : ${values.name ?? '(sans nom)'} — plan ${plan}`)
   console.log(`  tenant_id : ${tenantId}`)
+  console.log(`  Accès jusqu'au ${formatDate(untilAt)} (prolonger : pnpm ops:tenant-status --tenant ${tenantId} --add-days 30)`)
   console.log(`  Connexion : +${waId} / ${password}   (mot de passe provisoire, à changer dans « Mes paramètres »)`)
   console.log(`  Ensuite : pnpm ops:whatsapp --tenant ${tenantId} --waba-id … --phone-number-id …`)
 })

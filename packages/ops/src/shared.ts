@@ -76,9 +76,17 @@ export type TenantInput = {
   emergencyNumbers: { label: string; number: string }[] | null
 }
 
-export async function insertTenant(ex: Executor, input: TenantInput): Promise<string> {
-  const [row] = await ex.insert(tenants).values(input).returning({ id: tenants.id })
-  return row!.id
+/** `untilAt` vient du défaut de la base : 31 jours d'accès à la création. */
+export async function insertTenant(ex: Executor, input: TenantInput): Promise<{ id: string; untilAt: Date }> {
+  const [row] = await ex.insert(tenants).values(input).returning({ id: tenants.id, untilAt: tenants.untilAt })
+  return row!
+}
+
+/** Heure de Dakar (GMT toute l'année), quel que soit le fuseau de la machine. */
+export function formatDate(d: Date) {
+  return d.toLocaleString('fr-FR', {
+    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Dakar',
+  })
 }
 
 /**

@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "until_at" timestamp with time zone DEFAULT now() + interval '31 days' NOT NULL;

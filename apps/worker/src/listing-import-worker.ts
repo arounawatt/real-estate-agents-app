@@ -14,7 +14,7 @@ import {
   extractListingFromHtml, fetchListingHtmlPlain, isOwnListingDomain, looksLikeChallengePage,
 } from '@codaya/agent'
 import {
-  completeListingImportJob, failListingImportJob, getTenant,
+  completeListingImportJob, failListingImportJob, getTenant, tenantAccess,
 } from '@codaya/db'
 import { chromium } from 'playwright'
 
@@ -48,9 +48,9 @@ export async function processListingImportJob(data: ListingImportJobData) {
   const { jobId, tenantId, url } = data
 
   const tenant = await getTenant(tenantId)
-  // Agence désactivée entre la mise en file et le traitement : pas d'appel
-  // au modèle pour une agence qui n'a plus accès.
-  if (!tenant || tenant.disabledAt) {
+  // Agence désactivée ou en fin d'accès entre la mise en file et le
+  // traitement : pas d'appel au modèle pour une agence qui n'a plus accès.
+  if (!tenant || tenantAccess(tenant) !== 'active') {
     await failListingImportJob(jobId, 'tenant_disabled')
     return
   }

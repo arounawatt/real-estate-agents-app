@@ -38,6 +38,18 @@ export async function getTenant(tenantId: TenantId) {
   return row ?? null
 }
 
+/** Une agence n'a accès (connexion, réponses des agents) que si elle n'est
+ *  pas désactivée ET que sa date de fin d'accès n'est pas passée. Seule
+ *  source de cette règle : la connexion, les sessions et le worker l'appellent. */
+export function tenantAccess(
+  tenant: { disabledAt: Date | null; untilAt: Date },
+  now = new Date(),
+): 'active' | 'disabled' | 'expired' {
+  if (tenant.disabledAt) return 'disabled'
+  if (tenant.untilAt <= now) return 'expired'
+  return 'active'
+}
+
 export async function getTenantLogo(tenantId: TenantId) {
   const [row] = await db.select().from(tenantLogos).where(eq(tenantLogos.tenantId, tenantId)).limit(1)
   return row ?? null

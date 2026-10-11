@@ -16,6 +16,7 @@ const ERRORS: Record<string, string> = {
   invalid: 'Numéro ou mot de passe incorrect.',
   locked: 'Trop de tentatives. Réessayez dans 15 minutes.',
   suspended: "L'accès de votre agence est suspendu. Contactez Codaya pour le rétablir.",
+  expired: "L'abonnement de votre agence est arrivé à échéance. Contactez Codaya pour le renouveler.",
   phone_format: "Numéro non reconnu. Choisissez le pays, puis saisissez le numéro, par exemple 77 123 45 67.",
 }
 

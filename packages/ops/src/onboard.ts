@@ -17,7 +17,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { db } from '@codaya/db'
 import {
-  DISCLOSURE_LEVELS, generatePassword, insertTenant, insertWhatsappAccount, OpsError, parsePhone, PLANS, run,
+  DISCLOSURE_LEVELS, formatDate, generatePassword, insertTenant, insertWhatsappAccount, OpsError, parsePhone, PLANS, run,
   subscribeWaba, upsertAgencyUser, verifyWhatsapp, type TenantInput, type WhatsappInput,
 } from './shared.js'
 
@@ -112,19 +112,21 @@ run(async () => {
   }
 
   const passwords = new Map<string, string>()
-  const tenantId = await db.transaction(async (tx) => {
-    const id = await insertTenant(tx, tenant)
+  const { id: tenantId, untilAt } = await db.transaction(async (tx) => {
+    const created = await insertTenant(tx, tenant)
+    const id = created.id
     for (const admin of admins) {
       const password = admin.dashboardAccess ? generatePassword() : null
       if (password) passwords.set(admin.waId, password)
       await upsertAgencyUser(tx, id, { waId: admin.waId, fullName: admin.fullName, password })
     }
     if (whatsapp) await insertWhatsappAccount(tx, id, { ...whatsapp, displayPhoneNumber: displayPhoneNumber! })
-    return id
+    return created
   })
 
   console.log(`\n✓ Agence installée : ${tenant.name ?? '(sans nom)'} — plan ${tenant.plan}`)
   console.log(`  tenant_id : ${tenantId}`)
+  console.log(`  Accès jusqu'au ${formatDate(untilAt)} (prolonger : pnpm ops:tenant-status --tenant ${tenantId} --add-days 30)`)
   for (const admin of admins) {
     const pw = passwords.get(admin.waId)
     console.log(`  ${admin.fullName ?? 'Sans nom'} +${admin.waId} — ${pw ? `mot de passe provisoire : ${pw}` : 'sans accès au tableau de bord'}`)

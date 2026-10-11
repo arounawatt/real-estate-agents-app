@@ -8,7 +8,7 @@
  * les tables et les colonnes sont en anglais. Voir CLAUDE.md.
  */
 
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   boolean, customType, date, index, integer, jsonb, pgEnum, pgTable,
   text, timestamp, uniqueIndex, uuid,
@@ -114,6 +114,11 @@ export const tenants = pgTable('tenants', {
   disabledAt: timestamp('disabled_at', { withTimezone: true }),
   /** Motif interne, pour savoir pourquoi le jour où l'agence appelle. */
   disabledReason: text('disabled_reason'),
+
+  /** Fin de l'accès payé. Passée cette date, mêmes effets qu'une agence
+   *  désactivée (voir `tenantAccess`). 31 jours à la création ; prolongée
+   *  par `pnpm ops:tenant-status --until` ou `--add-days`. */
+  untilAt: timestamp('until_at', { withTimezone: true }).notNull().default(sql`now() + interval '31 days'`),
 
   /** Domaines publics de l'agence, au pluriel : site et sous-domaine d'annonces.
    *  Ne conditionnent rien de technique ; servent à distinguer « chez soi »
