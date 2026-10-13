@@ -203,7 +203,13 @@ export const triggerSafetyPathTool = {
     type: 'object' as const,
     properties: {
       reason: { type: 'string', enum: ['gas_leak', 'fire', 'flooding', 'dangerous_electrical', 'injury'] },
-      ticket_id: { type: 'string', description: 'The open ticket this concerns, if one exists.' },
+      ticket_id: {
+        type: 'string',
+        description: 'ONLY if the danger IS the problem of that open ticket (sparks on an open '
+          + 'electricity ticket). A danger unrelated to the open tickets (gas smell while a '
+          + 'ventilation ticket is open) is a NEW problem: omit ticket_id, then open a dedicated '
+          + 'ticket with open_ticket, setting safety_reason.',
+      },
     },
     required: ['reason'],
   },

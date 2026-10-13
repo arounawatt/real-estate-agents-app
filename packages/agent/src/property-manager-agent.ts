@@ -49,6 +49,24 @@ export const SAFETY_REASON_LABELS: Record<SafetyReasonCode, string> = {
 }
 
 const NATURES = ['plumbing', 'electricity', 'air_conditioning', 'locksmith', 'gas', 'admin', 'other'] as const
+
+/** Dossiers auxquels un danger peut se rattacher : il doit en être le
+ *  problème. Arrivé en test : une odeur de gaz greffée sur un dossier de VMC
+ *  (nature `other`) — le dossier affichait « Sécurité · odeur de gaz » et le
+ *  gaz n'avait pas de dossier à lui. null : toute nature (une blessure peut
+ *  venir de n'importe quel problème). */
+const SAFETY_COMPATIBLE_NATURES: Record<SafetyReasonCode, readonly string[] | null> = {
+  gas_leak: ['gas'],
+  fire: ['gas', 'electricity'],
+  flooding: ['plumbing'],
+  dangerous_electrical: ['electricity'],
+  injury: null,
+}
+
+export function isSafetyCompatible(code: SafetyReasonCode, nature: string): boolean {
+  const compatible = SAFETY_COMPATIBLE_NATURES[code]
+  return compatible === null || compatible.includes(nature)
+}
 const HABITABLE = ['yes', 'no', 'partly'] as const
 const UTILITY_CUT = ['none', 'water', 'power', 'water_and_power'] as const
 
@@ -291,6 +309,10 @@ function buildSystemPrompt(input: PropertyManagerTurnInput): string {
     + 'question, même sans dossier. Puis donne la consigne : couper l\'arrivée si c\'est sans danger, '
     + 'sortir du logement, appeler les secours avec les numéros que l\'outil te renvoie. Jamais '
     + '« c\'est bien noté, l\'agence revient vers vous » seul dans ce cas.',
+    'Un danger a son PROPRE dossier : ne le rattache jamais à un dossier ouvert sur un autre sujet '
+    + '(une odeur de gaz n\'a rien à voir avec un dossier de VMC). Après la consigne, ouvre un dossier '
+    + 'dédié avec open_ticket et safety_reason, sauf si le danger est le problème même d\'un dossier '
+    + 'déjà ouvert.',
     'N\'écris JAMAIS un numéro de téléphone qui ne vient pas de l\'outil — si la liste est vide, '
     + 'dis « appelez les secours » sans numéro. Ne dis jamais qu\'une équipe ou une intervention '
     + 'est en route : la seule chose vraie est que l\'agence est prévenue.',
@@ -365,6 +387,10 @@ export async function runPropertyManagerTurn(params: PropertyManagerTurnInput): 
         const ticket = await findOwnOpenTicket(input.ticket_id)
         if (!ticket) return { error: 'not_found: this ticket_id is not an open ticket of this tenant.' }
         const { safetyCode, ...facts } = readFacts(input)
+        // Même garde-fou que trigger_safety_path : un danger sans rapport ne
+        // s'inscrit pas sur ce dossier — l'alerte part quand même.
+        const unrelatedDanger = !!safetyCode && !isSafetyCompatible(safetyCode, ticket.nature)
+        if (unrelatedDanger) delete facts.safetyReason
         const description = typeof input.description === 'string' && input.description.trim()
           ? input.description.trim() : undefined
         await updateTicketFacts(tenantId, ticket.id, {
@@ -373,7 +399,14 @@ export async function runPropertyManagerTurn(params: PropertyManagerTurnInput): 
           ...urgencyFor({ ...ticket, ...facts }),
         })
         if (safetyCode) await raiseSafety(safetyCode)
-        return { ok: true, ...(safetyCode ? { emergency_numbers: params.tenant.emergencyNumbers ?? [] } : {}) }
+        return {
+          ok: true,
+          ...(safetyCode ? { emergency_numbers: params.tenant.emergencyNumbers ?? [] } : {}),
+          ...(unrelatedDanger ? {
+            ticket: `The danger was NOT written on ticket ${ticket.reference}: it is about another problem. `
+              + `Open a DEDICATED ticket with open_ticket (safety_reason: ${safetyCode}).`,
+          } : {}),
+        }
       }
 
       case 'trigger_safety_path': {
@@ -381,7 +414,8 @@ export async function runPropertyManagerTurn(params: PropertyManagerTurnInput): 
         if (!code) return { error: `reason must be one of: ${Object.keys(SAFETY_REASON_LABELS).join(', ')}` }
         await raiseSafety(code)
         const ticket = await findOwnOpenTicket(input.ticket_id)
-        if (ticket) {
+        const attached = !!ticket && isSafetyCompatible(code, ticket.nature)
+        if (ticket && attached) {
           const safetyReason = SAFETY_REASON_LABELS[code]
           await updateTicketFacts(tenantId, ticket.id, { safetyReason, ...urgencyFor({ ...ticket, safetyReason }) })
         }
@@ -391,6 +425,12 @@ export async function runPropertyManagerTurn(params: PropertyManagerTurnInput): 
           emergency_numbers: params.tenant.emergencyNumbers ?? [],
           instruction: 'Give the safety instruction now, with these numbers. If the list is empty, '
             + 'tell them to call emergency services immediately — never invent a number.',
+          ...(attached ? {} : {
+            ticket: (ticket ? `Not attached to ticket ${ticket.reference}: it is about another problem. ` : '')
+              + 'In this same turn, after the safety instruction, open a DEDICATED ticket for this danger '
+              + `with open_ticket (safety_reason: ${code}) if you know the property; otherwise ask for it `
+              + 'only after the safety instruction.',
+          }),
         }
       }
 
