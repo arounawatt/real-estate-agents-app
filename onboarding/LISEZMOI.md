@@ -54,6 +54,7 @@ Le script vérifie tout avant d'écrire (format, numéros déjà utilisés, jeto
 | `listingDomains` | Domaines du site de l'agence, ceux dont Amadou peut lire les annonces. |
 | `bookingUrlRental` | Lien de prise de rendez-vous (Calendly ou autre). Sert à tout si `splitBookingLinks` est `false`. |
 | `bookingUrlSale` | Lien pour les ventes, utilisé seulement si `splitBookingLinks` est `true`. |
+| `address`, `phone`, `contactEmail`, `openingHours` | Coordonnées de l'agence, données mot pour mot par Coumba et Malick quand on les leur demande (outil `get_agency_info`). Facultatives, modifiables ensuite dans « Mes paramètres ». Plusieurs téléphones : séparés par une virgule. |
 | `disclosureLevel` | `neighbourhood` (Coumba situe le quartier par des faits) ou `listing_only` (elle s'en tient aux annonces). |
 | `emergencyNumbers` | Numéros d'urgence donnés par Malick en cas de danger : `[{ "label": "Pompiers", "number": "…" }]`. **À obtenir de l'agence, ne pas les deviner.** |
 

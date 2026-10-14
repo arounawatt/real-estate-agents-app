@@ -12,7 +12,7 @@
  * qu'il est `pending` (<JobPoller>, poll toutes les 2s).
  */
 import { getListingImportJob, getTenant } from '@codaya/db'
-import type { ListingExtraction } from '@codaya/agent'
+import { importableListingDomains, type ListingExtraction } from '@codaya/agent'
 import Link from 'next/link'
 import { ActionForm } from '@/components/ActionForm'
 import { JobPoller } from '@/components/JobPoller'
@@ -25,7 +25,7 @@ import { hostOf } from '@/lib/url'
 
 const IMPORT_ERROR_MESSAGES: Record<string, string> = {
   domain_not_allowed:
-    "Cette page n'appartient pas à un domaine d'annonces connu de l'agence. Amadou ne lit que les annonces de l'agence cliente, jamais celles d'une autre.",
+    "Cette page n'est ni sur le site de l'agence ni sur un portail d'annonces reconnu. Amadou ne lit que ces adresses-là.",
   fetch_failed: "Impossible de lire cette page (introuvable, protégée, ou vide).",
   no_extraction: "Aucune information exploitable n'a été trouvée sur cette page.",
 }
@@ -59,7 +59,8 @@ export default async function NewPropertyPage({
   const { job: jobId, importError, sourceUrl } = await searchParams
   const { tenantId } = await getSession()
   const tenant = await getTenant(tenantId)
-  const listingDomains = tenant?.listingDomains ?? []
+  // Domaines de l'agence + portails communs à toutes (SHARED_LISTING_DOMAINS).
+  const listingDomains = importableListingDomains(tenant?.listingDomains ?? [])
 
   const job = jobId ? await getListingImportJob(tenantId, jobId) : null
 
@@ -113,7 +114,7 @@ export default async function NewPropertyPage({
             </SubmitButton>
           </ActionForm>
           <p className="hint">
-            Amadou ne lit que les annonces publiées sur {listingDomains.join(', ')} — jamais celles d&apos;une autre agence.
+            Amadou lit les annonces publiées sur {listingDomains.join(', ')}. Sur un portail, collez uniquement vos propres annonces.
           </p>
           {job?.status === 'pending' && (
             <>

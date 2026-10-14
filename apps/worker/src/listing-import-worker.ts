@@ -11,7 +11,7 @@
  * contourné : voir packages/agent/src/listing-import.ts.
  */
 import {
-  extractListingFromHtml, fetchListingHtmlPlain, isOwnListingDomain, looksLikeChallengePage,
+  extractListingFromHtml, fetchListingHtmlPlain, importableListingDomains, isOwnListingDomain, looksLikeChallengePage,
 } from '@codaya/agent'
 import {
   completeListingImportJob, failListingImportJob, getTenant, tenantAccess,
@@ -54,7 +54,7 @@ export async function processListingImportJob(data: ListingImportJobData) {
     await failListingImportJob(jobId, 'tenant_disabled')
     return
   }
-  if (!isOwnListingDomain(url, tenant?.listingDomains ?? [])) {
+  if (!isOwnListingDomain(url, importableListingDomains(tenant.listingDomains))) {
     await failListingImportJob(jobId, 'domain_not_allowed')
     return
   }

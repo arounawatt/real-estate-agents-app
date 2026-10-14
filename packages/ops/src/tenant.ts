@@ -23,7 +23,8 @@ run(async () => {
   const { id: tenantId, untilAt } = await db.transaction(async (tx) => {
     const created = await insertTenant(tx, {
       name: values.name?.trim() || null, plan, listingDomains: [], bookingUrlRental: null, bookingUrlSale: null,
-      splitBookingLinks: false, disclosureLevel: 'neighbourhood', emergencyNumbers: null,
+      splitBookingLinks: false, address: null, phone: null, contactEmail: null, openingHours: null,
+      disclosureLevel: 'neighbourhood', emergencyNumbers: null,
     })
     await upsertAgencyUser(tx, created.id, { waId, fullName: values['admin-name'] ?? null, password })
     return created

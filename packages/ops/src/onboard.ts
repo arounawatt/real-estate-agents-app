@@ -66,6 +66,10 @@ function parseFile(raw: unknown): { tenant: TenantInput; admins: Admin[]; whatsa
     bookingUrlRental: url(agency.bookingUrlRental, 'agency.bookingUrlRental'),
     bookingUrlSale: url(agency.bookingUrlSale, 'agency.bookingUrlSale'),
     splitBookingLinks: agency.splitBookingLinks === true,
+    address: str(agency.address, 'agency.address'),
+    phone: str(agency.phone, 'agency.phone'),
+    contactEmail: str(agency.contactEmail, 'agency.contactEmail'),
+    openingHours: str(agency.openingHours, 'agency.openingHours'),
     disclosureLevel,
     emergencyNumbers: emergency.length ? emergency : null,
   }

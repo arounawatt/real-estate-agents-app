@@ -45,6 +45,19 @@ export type ListingImportResult =
   | { ok: true; data: ListingExtraction; rawText: string }
   | { ok: false; reason: 'domain_not_allowed' | 'fetch_failed' | 'no_extraction' }
 
+/** Portails d'annonces où publient les agences sénégalaises : Amadou peut y
+ *  lire une annonce pour TOUTES les agences, en plus de leurs propres domaines
+ *  (décision du 14/10/2026). Sur un portail, rien ne prouve que l'annonce est
+ *  celle de l'agence : c'est elle qui colle l'adresse, et elle en répond.
+ *  Ces domaines ne sont PAS ajoutés à `tenant.listingDomains`, qui dit ce qui
+ *  est « chez soi » : un lien vers un portail reste affiché comme tiers. */
+export const SHARED_LISTING_DOMAINS = ['keur-immo.com', 'expat-dakar.com', 'senhubimmo.com'] as const
+
+/** Domaines où Amadou peut lire une annonce pour cette agence. */
+export function importableListingDomains(tenantDomains: string[]): string[] {
+  return [...new Set([...tenantDomains, ...SHARED_LISTING_DOMAINS])]
+}
+
 export function isOwnListingDomain(url: string, allowedDomains: string[]): boolean {
   let host: string
   try {
@@ -206,7 +219,7 @@ export async function extractListingFromUrl(
   url: string,
   allowedDomains: string[],
 ): Promise<ListingImportResult> {
-  if (allowedDomains.length === 0 || !isOwnListingDomain(url, allowedDomains)) {
+  if (!isOwnListingDomain(url, importableListingDomains(allowedDomains))) {
     return { ok: false, reason: 'domain_not_allowed' }
   }
   const html = await fetchListingHtmlPlain(url)

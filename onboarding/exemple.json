@@ -6,6 +6,10 @@
     "bookingUrlRental": "https://calendly.com/keurimmo/visite",
     "bookingUrlSale": null,
     "splitBookingLinks": false,
+    "address": "12 rue Carnot, Plateau, Dakar",
+    "phone": "+221 33 800 00 00",
+    "contactEmail": "contact@keurimmo.sn",
+    "openingHours": "Lundi-vendredi 9 h-18 h, samedi 9 h-13 h",
     "disclosureLevel": "neighbourhood",
     "emergencyNumbers": []
   },

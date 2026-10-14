@@ -12,6 +12,7 @@ import {
   createEscalation, createVisitRequestRow, getProperty, searchPublishedProperties,
   updateLeadQualification, type LeadQualificationInput,
 } from '@codaya/db'
+import { readAgencyInfo } from './agency.js'
 import { runAgentLoop, type AgentTurnResult } from './agent-loop.js'
 import { FIRST_MESSAGE_RULE } from './introductions.js'
 import { SALES_TOOLS } from './tools.js'
@@ -213,6 +214,9 @@ async function executeTool(
       }
       return url ? { mode: 'link', url } : { mode: 'callback' }
     }
+
+    case 'get_agency_info':
+      return readAgencyInfo(ctx.tenantId)
 
     case 'escalate_to_human': {
       await createEscalation(

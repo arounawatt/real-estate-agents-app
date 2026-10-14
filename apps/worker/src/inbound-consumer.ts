@@ -15,7 +15,7 @@ import {
   recordInboundMedia, recordInboundMessage, recordOutboundMessage, tenantAccess, updateConversationAgentState,
 } from '@codaya/db'
 import {
-  buildIntroduction, ensureSafetyNotice, withIntroduction, withVideoNotice, ESCALATION_FALLBACK_MESSAGE, routeProfile,
+  agencyPhoneAmounts, buildIntroduction, ensureSafetyNotice, withIntroduction, withVideoNotice, ESCALATION_FALLBACK_MESSAGE, routeProfile,
   runPropertyManagerTurn, runSalesTurn,
   screenOutbound,
 } from '@codaya/agent'
@@ -287,6 +287,8 @@ async function runSales(
     // a pu la mettre à jour pendant ce tour.
     const updatedLead = await getLead(tenantId, lead.id)
     if (updatedLead?.budgetAmount) knownPrices.push(updatedLead.budgetAmount)
+    // Le téléphone de l'agence (get_agency_info) n'est pas un montant non plus.
+    knownPrices.push(...agencyPhoneAmounts(tenant.phone))
 
     const screen = screenOutbound(reply, knownPrices)
     finalText = screen.ok ? reply : ESCALATION_FALLBACK_MESSAGE
@@ -339,9 +341,12 @@ async function runPropertyManager(
     safetyTriggered = result.safetyTriggered
 
     // Malick ne cite AUCUN montant : coût et prise en charge sont en zone
-    // rouge. Seuls les numéros d'urgence configurés par l'agence passent le
+    // rouge. Seuls les numéros d'urgence et le téléphone de l'agence passent le
     // filtre des montants (un numéro vert ressemble à un montant).
-    const allowed = (emergencyNumbers ?? []).map((n) => Number(n.number.replace(/\D/g, ''))).filter(Number.isFinite)
+    const allowed = [
+      ...(emergencyNumbers ?? []).map((n) => Number(n.number.replace(/\D/g, ''))).filter(Number.isFinite),
+      ...agencyPhoneAmounts(tenant.phone),
+    ]
     const screen = screenOutbound(result.reply, allowed)
     finalText = screen.ok ? result.reply : ESCALATION_FALLBACK_MESSAGE
     if (!screen.ok) {

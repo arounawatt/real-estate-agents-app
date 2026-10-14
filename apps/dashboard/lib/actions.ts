@@ -1,6 +1,6 @@
 'use server'
 
-import { agencyReference, isOwnListingDomain } from '@codaya/agent'
+import { agencyReference, importableListingDomains, isOwnListingDomain } from '@codaya/agent'
 import {
   createListingImportJob, createProperty, forceTicketUrgency, getLeadWithContact, getProperty,
   getTenant, getThreadByContactAndProfile, getWhatsappAccountByTenant, markLeadHandedOver,
@@ -189,7 +189,7 @@ export async function analyzeListingAction(formData: FormData) {
   if (!url) redirect('/properties/new')
 
   const tenant = await getTenant(tenantId)
-  if (!isOwnListingDomain(url, tenant?.listingDomains ?? [])) {
+  if (!isOwnListingDomain(url, importableListingDomains(tenant?.listingDomains ?? []))) {
     redirect(`/properties/new?importError=domain_not_allowed&sourceUrl=${encodeURIComponent(url)}`)
   }
 
@@ -275,6 +275,11 @@ export async function updateTenantSettingsAction(formData: FormData) {
   const bookingUrlSale = readBookingUrl(formData, 'bookingUrlSale')
   if (bookingUrlRental === 'invalid' || bookingUrlSale === 'invalid') redirect('/settings?error=invalid_url')
 
+  // Coordonnées : texte libre, renvoyé tel quel par get_agency_info.
+  const text = (key: string) => String(formData.get(key) ?? '').trim() || null
+  const contactEmail = text('contactEmail')
+  if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) redirect('/settings?error=invalid_email')
+
   const logo = formData.get('logo')
   if (logo instanceof File && logo.size > 0) {
     if (!LOGO_TYPES.includes(logo.type)) redirect('/settings?error=logo_type')
@@ -286,6 +291,10 @@ export async function updateTenantSettingsAction(formData: FormData) {
     bookingUrlRental,
     bookingUrlSale,
     splitBookingLinks: formData.get('splitBookingLinks') === 'on',
+    address: text('address'),
+    phone: text('phone'),
+    contactEmail,
+    openingHours: text('openingHours'),
   })
 
   if (logo instanceof File && logo.size > 0) {

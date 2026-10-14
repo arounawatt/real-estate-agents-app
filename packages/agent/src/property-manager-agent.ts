@@ -16,6 +16,7 @@ import {
   attachPendingMediaToTicket, createEscalation, createTicket, listOpenTicketsForContact,
   updateTicketFacts, type TicketFactsInput,
 } from '@codaya/db'
+import { readAgencyInfo } from './agency.js'
 import { runAgentLoop, type AgentTurnResult } from './agent-loop.js'
 import { PROPERTY_MANAGER_TOOLS } from './tools.js'
 import { computeUrgency } from './urgency.js'
@@ -433,6 +434,9 @@ export async function runPropertyManagerTurn(params: PropertyManagerTurnInput): 
           }),
         }
       }
+
+      case 'get_agency_info':
+        return readAgencyInfo(tenantId)
 
       case 'escalate_to_human': {
         await createEscalation(

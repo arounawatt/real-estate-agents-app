@@ -476,6 +476,10 @@ export async function updateTenantSettings(tenantId: TenantId, input: {
   bookingUrlRental: string | null
   bookingUrlSale: string | null
   splitBookingLinks: boolean
+  address: string | null
+  phone: string | null
+  contactEmail: string | null
+  openingHours: string | null
 }) {
   await db.update(tenants).set(input).where(eq(tenants.id, tenantId))
 }

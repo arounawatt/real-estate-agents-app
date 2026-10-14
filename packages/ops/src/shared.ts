@@ -72,6 +72,10 @@ export type TenantInput = {
   bookingUrlRental: string | null
   bookingUrlSale: string | null
   splitBookingLinks: boolean
+  address: string | null
+  phone: string | null
+  contactEmail: string | null
+  openingHours: string | null
   disclosureLevel: (typeof DISCLOSURE_LEVELS)[number]
   emergencyNumbers: { label: string; number: string }[] | null
 }

@@ -1,5 +1,5 @@
 /**
- * « Mes paramètres » — nom, logo et liens de prise de rendez-vous.
+ * « Mes paramètres » — nom, logo, coordonnées et liens de prise de rendez-vous.
  *
  * Le nom est facultatif : sans lui, Coumba et le message de reprise de
  * main parlent de « l'agence », et l'en-tête affiche « Codaya ». Les liens sont
@@ -20,6 +20,7 @@ import { getSession } from '@/lib/session'
 
 const ERRORS: Record<string, string> = {
   invalid_url: 'Un lien de prise de rendez-vous doit être une adresse web complète (https://…).',
+  invalid_email: 'Adresse email non reconnue. Vérifiez-la, par exemple contact@monagence.sn.',
   logo_type: 'Le logo doit être une image PNG, JPEG ou WebP.',
   logo_size: 'Le logo dépasse 500 Ko. Réduisez-le avant de le renvoyer.',
   admin_number_invalid: 'Numéro non reconnu. Choisissez le pays, puis saisissez le numéro, par exemple 77 123 45 67.',
@@ -71,6 +72,32 @@ export default async function SettingsPage({
                 <span>Retirer le logo (l&apos;initiale s&apos;affichera à la place)</span>
               </label>
             )}
+          </div>
+        </section>
+
+        <section className="card">
+          <div className="card-hd"><h3>Coordonnées de l&apos;agence</h3></div>
+          <p className="hint" style={{ paddingTop: 16 }}>
+            Coumba et Malick les donnent mot pour mot quand un client ou un locataire les demande. Un champ vide,
+            ils disent qu&apos;ils ne l&apos;ont pas. Ils ne proposent jamais d&apos;eux-mêmes d&apos;appeler l&apos;agence.
+          </p>
+          <div className="formgrid" style={{ paddingTop: 0 }}>
+            <div className="fld span2">
+              <span>Adresse</span>
+              <input type="text" name="address" defaultValue={tenant.address ?? ''} placeholder="Ex. 12 rue Carnot, Plateau, Dakar" />
+            </div>
+            <div className="fld">
+              <span>Téléphone — plusieurs numéros : séparez-les par une virgule</span>
+              <input type="text" name="phone" defaultValue={tenant.phone ?? ''} placeholder="+221 33 800 00 00" />
+            </div>
+            <div className="fld">
+              <span>Email</span>
+              <input type="email" name="contactEmail" defaultValue={tenant.contactEmail ?? ''} placeholder="contact@…" />
+            </div>
+            <div className="fld span2">
+              <span>Horaires d&apos;ouverture</span>
+              <input type="text" name="openingHours" defaultValue={tenant.openingHours ?? ''} placeholder="Ex. lundi-vendredi 9 h-18 h, samedi 9 h-13 h" />
+            </div>
           </div>
         </section>
 

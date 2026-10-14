@@ -131,6 +131,14 @@ export const tenants = pgTable('tenants', {
   bookingUrlSale: text('booking_url_sale'),
   splitBookingLinks: boolean('split_booking_links').notNull().default(false),
 
+  /** Coordonnées publiques de l'agence, saisies dans « Mes paramètres » et
+   *  renvoyées telles quelles par l'outil get_agency_info. Texte libre, jamais
+   *  reformulé : un champ vide veut dire que l'agent ne l'a pas, et il le dit. */
+  address: text('address'),
+  phone: text('phone'),
+  contactEmail: text('contact_email'),
+  openingHours: text('opening_hours'),
+
   /** Numéros d'urgence de la ville, affichés par le chemin de sécurité.
    *  Configuration par tenant, jamais des valeurs codées en dur. */
   emergencyNumbers: jsonb('emergency_numbers').$type<{ label: string; number: string }[]>(),

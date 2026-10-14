@@ -215,6 +215,20 @@ export const triggerSafetyPathTool = {
   },
 }
 
+export const getAgencyInfoTool = {
+  name: 'get_agency_info',
+  description:
+    "The agency's address, phone, email and opening hours, exactly as the agency entered "
+    + 'them. Call it whenever the person asks where the agency is, when it is open or how to '
+    + 'reach it. Give only what they asked for, word for word. A null field is one you do not '
+    + 'have: say so, never complete or guess it. Never offer the phone number on your own as '
+    + 'an alternative to a visit or a callback — the agency calls the client back, not the reverse.',
+  input_schema: {
+    type: 'object' as const,
+    properties: {},
+  },
+}
+
 export const escalateTool = {
   name: 'escalate_to_human',
   description:
@@ -251,9 +265,11 @@ export const fetchListingTool = {
 
 export const SALES_TOOLS = [
   saveQualificationTool, searchPropertiesTool, getPropertyTool,
-  offerVisitTool, escalateTool,
+  offerVisitTool, getAgencyInfoTool, escalateTool,
 ]
 
-export const PROPERTY_MANAGER_TOOLS = [openTicketTool, updateTicketTool, triggerSafetyPathTool, escalateTool]
+export const PROPERTY_MANAGER_TOOLS = [
+  openTicketTool, updateTicketTool, triggerSafetyPathTool, getAgencyInfoTool, escalateTool,
+]
 
 export const CATALOGUE_TOOLS = [fetchListingTool]
