@@ -82,7 +82,11 @@ export const getPropertyTool = {
     'When presenting these details to the prospect, if listing_url is present, ALWAYS ' +
     'share it too and invite them to see more there (photos, full description…). ' +
     'If listing_url is null, say you have no page to send — never build a URL ' +
-    'from the reference, it would produce dead links sent to real buyers.',
+    'from the reference, it would produce dead links sent to real buyers. '
+    + 'rent_period (month, week, night) says what a rental price covers. '
+    + 'charges: "excluded" = price excludes charges (notes may say which), '
+    + '"included" = charges included. furnished: furnished, unfurnished or partly. '
+    + 'A null field is one the agency did not give: say you do not know, never guess.',
   input_schema: {
     type: 'object' as const,
     properties: { property_id: { type: 'string' } },

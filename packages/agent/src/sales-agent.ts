@@ -18,6 +18,13 @@ import { FIRST_MESSAGE_RULE } from './introductions.js'
 import { SALES_TOOLS } from './tools.js'
 import { renderZonePrompt } from './zones.js'
 
+/** « none » (sans objet ou non renseigné) et « to_qualify » ne disent rien du
+ *  bien : on les rend `null`, que le modèle lit comme « je ne sais pas »,
+ *  plutôt qu'une valeur qu'il pourrait prendre pour « pas de charges ». */
+function knownOrNull<T extends string>(value: T): Exclude<T, 'none' | 'to_qualify'> | null {
+  return value === 'none' || value === 'to_qualify' ? null : value as Exclude<T, 'none' | 'to_qualify'>
+}
+
 interface TenantContext {
   id: string
   name: string | null
@@ -174,7 +181,7 @@ async function executeTool(
       return {
         properties: rows.map((p) => ({
           id: p.id, title: p.title, city: p.city, district: p.district,
-          price: p.price, transaction: p.transaction, type: p.type,
+          price: p.price, rent_period: knownOrNull(p.rentPeriod), transaction: p.transaction, type: p.type,
         })),
       }
     }
@@ -185,9 +192,13 @@ async function executeTool(
       if (!property || property.status !== 'published') return { error: 'not_found' }
       return {
         id: property.id, title: property.title, price: property.price,
+        rent_period: knownOrNull(property.rentPeriod), charges: knownOrNull(property.charges),
         transaction: property.transaction, type: property.type, typology: property.typology,
-        city: property.city, district: property.district, areaSqm: property.areaSqm,
+        city: property.city, district: property.district, floor: property.floor, areaSqm: property.areaSqm,
         rooms: property.rooms, bedrooms: property.bedrooms, bathrooms: property.bathrooms,
+        guest_toilet: property.guestToilet, furnished: knownOrNull(property.furnished),
+        availability: property.availability,
+        available_from: property.availability === 'from_date' ? property.availableFrom : null,
         amenities: property.amenities, services: property.services, notes: property.notes,
         listing_url: property.listingUrl,
       }
