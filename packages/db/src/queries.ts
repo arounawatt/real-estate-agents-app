@@ -21,7 +21,7 @@
  * travers des outils à paramètres fermés.
  */
 
-import { and, desc, eq, gte, ilike, inArray, isNull, lt, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, inArray, isNull, lte, ne, sql } from 'drizzle-orm'
 import { db } from './client.js'
 import {
   agencyUsers, contacts, conversations, leads, listingImportJobs, messageMedia, messages, properties, tenantLogos,
@@ -171,7 +171,9 @@ export async function searchPublishedProperties(tenantId: TenantId, criteria: {
   // Tolérance de 20 % au-dessus du budget annoncé : un bien légèrement plus
   // cher reste une option à proposer honnêtement (avec son vrai prix), plutôt
   // que de renvoyer « rien trouvé » et pousser le modèle à improviser un chiffre.
-  if (criteria.maxPrice) conds.push(lt(properties.price, Math.round(criteria.maxPrice * 1.2)))
+  // Borne incluse : les loyers sont des chiffres ronds, budget 1 000 000 et
+  // loyer 1 200 000 tombent pile dessus — exclus, le bien disparaissait.
+  if (criteria.maxPrice) conds.push(lte(properties.price, Math.round(criteria.maxPrice * 1.2)))
 
   return db.select().from(properties).where(and(...conds)).limit(criteria.limit ?? 5)
 }
