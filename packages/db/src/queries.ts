@@ -141,6 +141,11 @@ export async function countAwaitingReply(tenantId: TenantId) {
  * Coumba — c'est ce qui rend l'interrupteur de publication réellement
  * efficace, et pas seulement décoratif.
  */
+/** Motif ILIKE « contient » ; % et _ saisis par le modèle restent littéraux. */
+function containsPattern(value: string): string {
+  return `%${value.trim().replace(/[\\%_]/g, '\\$&')}%`
+}
+
 export async function searchPublishedProperties(tenantId: TenantId, criteria: {
   transaction?: 'sale' | 'long_term_rental' | 'short_term_rental'
   type?: 'apartment' | 'villa' | 'land' | 'commercial'
@@ -158,8 +163,11 @@ export async function searchPublishedProperties(tenantId: TenantId, criteria: {
   // ilike : un prospect écrit « mermoz » ou « Mermoz », et confond souvent
   // quartier et ville — une correspondance exacte sur la casse a déjà
   // produit un faux « rien de publié » sur un bien qui existait.
-  if (criteria.city) conds.push(ilike(properties.city, criteria.city))
-  if (criteria.district) conds.push(ilike(properties.district, criteria.district))
+  // Et « contient », pas « égal » : le prospect écrit « Keur Gorgui », la
+  // fiche dit « Cité Keur Gorgui » — l'égalité stricte a fait répondre à
+  // Coumba qu'il n'y avait rien, devant un prospect, sur deux biens publiés.
+  if (criteria.city) conds.push(ilike(properties.city, containsPattern(criteria.city)))
+  if (criteria.district) conds.push(ilike(properties.district, containsPattern(criteria.district)))
   // Tolérance de 20 % au-dessus du budget annoncé : un bien légèrement plus
   // cher reste une option à proposer honnêtement (avec son vrai prix), plutôt
   // que de renvoyer « rien trouvé » et pousser le modèle à improviser un chiffre.
