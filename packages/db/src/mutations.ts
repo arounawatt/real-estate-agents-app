@@ -429,6 +429,20 @@ export interface LeadQualificationInput {
   notes?: string
 }
 
+/** Lieu de vie déclaré par le contact (save_qualification). Même règle que
+ *  pour le lead : seuls les champs fournis sont écrits. */
+export async function updateContactResidence(
+  tenantId: TenantId,
+  contactId: string,
+  input: { residence?: 'senegal' | 'abroad' | 'to_qualify'; declaredCity?: string },
+) {
+  const set: Record<string, unknown> = {}
+  if (input.residence !== undefined) set.residence = input.residence
+  if (input.declaredCity !== undefined) set.declaredCity = input.declaredCity
+  if (Object.keys(set).length === 0) return
+  await db.update(contacts).set(set).where(and(eq(contacts.tenantId, tenantId), eq(contacts.id, contactId)))
+}
+
 /** Ne touche que les champs réellement fournis par ce tool call — jamais
  *  n'écrase par défaut un fait déjà révélé lors d'un tour précédent. */
 export async function updateLeadQualification(

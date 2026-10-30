@@ -63,6 +63,7 @@ async function main() {
     phone: '+33 6 51 22 84 14',
     fullName: 'Mamadou Diallo',
     declaredCity: 'Paris',
+    residence: 'abroad',
     kind: 'prospect',
   }).returning()
   if (!contact) throw new Error('Échec de création du contact')
@@ -115,6 +116,7 @@ async function main() {
     phone: '+33 7 84 09 33 27',
     fullName: 'Sophie Bernard',
     declaredCity: 'Lyon',
+    residence: 'abroad',
     kind: 'prospect',
   }).returning()
   if (!contact2) throw new Error('Échec de création du contact 2')
@@ -138,6 +140,7 @@ async function main() {
     phone: '+221 77 614 28 05',
     fullName: 'Aïssatou Fall',
     declaredCity: 'Dakar',
+    residence: 'senegal',
     kind: 'prospect',
   }).returning()
   if (!contact3) throw new Error('Échec de création du contact 3')

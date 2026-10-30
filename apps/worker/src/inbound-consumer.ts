@@ -260,7 +260,10 @@ async function runSales(
         bookingUrlSale: tenant.bookingUrlSale,
         splitBookingLinks: tenant.splitBookingLinks,
       },
-      contact: { fullName: contact.fullName, declaredCity: contact.declaredCity },
+      contact: {
+        id: contact.id, fullName: contact.fullName,
+        declaredCity: contact.declaredCity, residence: contact.residence,
+      },
       lead: {
         intent: lead.intent,
         propertyType: lead.propertyType,

@@ -1,14 +1,20 @@
-/**
- * Le numéro est une donnée qu'on possède réellement — ce n'est pas une
- * déduction. Ne sert qu'à distinguer un indicatif étranger, jamais à
- * déduire une ville : « l'indicatif donne le pays du numéro, pas celui de
- * la personne » (packages/db/src/schema.ts, commentaire sur `contacts`).
- */
-export function isForeignNumber(phone: string): boolean {
-  return !phone.replace(/\s/g, '').startsWith('+221')
-}
-
 import { countryByIso, countryOfWaId, flagOf } from './countries'
+
+/**
+ * « Numéro France » : le pays d'un indicatif étranger, null pour un numéro
+ * sénégalais. Le numéro est une donnée qu'on possède réellement, mais il ne
+ * dit que le pays du NUMÉRO, pas celui de la personne (commentaire sur
+ * `contacts` dans packages/db/src/schema.ts) — d'où ce libellé, et jamais
+ * « Diaspora » : celui-là ne vient que de `contacts.residence`, déclaré.
+ *
+ * Les numéros sont stockés au format wa_id de Meta, sans « + » : l'ancien
+ * test `startsWith('+221')` marquait donc TOUS les contacts comme diaspora.
+ */
+export function foreignNumberLabel(phone: string): string | null {
+  const country = countryOfWaId(phone.replace(/\D/g, ''))
+  if (!country || country.iso === 'SN') return null
+  return `Numéro ${country.name}`
+}
 
 /**
  * Indicatif choisi + numéro national → format wa_id de Meta (chiffres,

@@ -38,6 +38,21 @@ export const saveQualificationTool = {
         type: 'string',
         enum: ['immediate', 'three_months', 'six_months', 'later', 'to_qualify'],
       },
+      residence: {
+        type: 'string',
+        enum: ['senegal', 'abroad', 'to_qualify'],
+        description:
+          'Where the prospect says they LIVE NOW. Set it only when they state it themselves ' +
+          '("je vis à Paris", "je suis au Sénégal"). Never infer it from the phone number, ' +
+          'the language, the name or the project. This is current residence, not origin.',
+      },
+      declared_city: {
+        type: 'string',
+        description:
+          'The city the prospect says they LIVE in today, as they wrote it — NOT the city ' +
+          'where they are looking for a property. "Je vis à Paris et je cherche à Dakar" → ' +
+          'Paris. Omit if they have not said where they live.',
+      },
       notes: {
         type: 'string',
         description:

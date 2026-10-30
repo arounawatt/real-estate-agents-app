@@ -28,6 +28,9 @@ export const agencyRoleEnum = pgEnum('agency_role', ['owner', 'agent'])
 
 export const contactKindEnum = pgEnum('contact_kind', ['prospect', 'tenant', 'unknown'])
 
+/** Où la personne DIT vivre aujourd'hui — jamais déduit de l'indicatif. */
+export const residenceEnum = pgEnum('residence', ['senegal', 'abroad', 'to_qualify'])
+
 export const intentEnum = pgEnum('intent', [
   'purchase', 'rental', 'investment', 'to_qualify',
 ])
@@ -249,6 +252,9 @@ export const contacts = pgTable('contacts', {
   /** Déclarée par la personne uniquement. L'indicatif donne le pays du
    *  NUMÉRO, pas celui de la personne : ne jamais en déduire une ville. */
   declaredCity: text('declared_city'),
+  /** Seule source du badge « Diaspora » : `abroad` uniquement si la personne
+   *  a dit elle-même vivre hors du Sénégal. Un numéro +33 ne suffit pas. */
+  residence: residenceEnum('residence').notNull().default('to_qualify'),
   kind: contactKindEnum('kind').notNull().default('unknown'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({

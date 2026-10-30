@@ -13,7 +13,7 @@ import { Pager } from '@/components/Pager'
 import {
   INTENT_LABELS, PROPERTY_TYPE_LABELS, TICKET_NATURE_LABELS,
 } from '@/lib/labels'
-import { isForeignNumber } from '@/lib/phone'
+import { foreignNumberLabel } from '@/lib/phone'
 import { getSession } from '@/lib/session'
 
 const PER_PAGE = 12
@@ -78,7 +78,8 @@ export default async function ConversationsPage({
                   <div className="row-top">
                     <span className="row-name">
                       {contact.fullName ?? contact.phone}
-                      {isForeignNumber(contact.phone) && <span className="badge dia" style={{ marginLeft: 8 }}>Diaspora</span>}
+                      {contact.residence === 'abroad' && <span className="badge dia" style={{ marginLeft: 8 }}>Diaspora</span>}
+                      {foreignNumberLabel(contact.phone) && <span className="badge nt" style={{ marginLeft: 8 }}>{foreignNumberLabel(contact.phone)}</span>}
                     </span>
                     <span className="row-time">
                       {new Date(item.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}

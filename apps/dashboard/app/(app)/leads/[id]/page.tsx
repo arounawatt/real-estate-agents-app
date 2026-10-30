@@ -29,7 +29,7 @@ import { handoverLeadAction, releaseHandoverAction, updateContactAction } from '
 import {
   CONTACT_KIND_LABELS, INTENT_LABELS, PROPERTY_TYPE_LABELS, TIMELINE_LABELS, VISIT_MODE_LABELS,
 } from '@/lib/labels'
-import { isForeignNumber } from '@/lib/phone'
+import { foreignNumberLabel } from '@/lib/phone'
 import { getSession } from '@/lib/session'
 import { hostOf } from '@/lib/url'
 
@@ -76,10 +76,13 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           </p>
           <a href={`tel:${contact.phone.replace(/\s/g, '')}`} className="telbtn">{contact.phone}</a>
         </div>
-        {isForeignNumber(contact.phone) && (
+        {contact.residence === 'abroad' && (
           <span className="badge dia" style={{ height: 22 }}>
             Diaspora{contact.declaredCity ? ` · ${contact.declaredCity}` : ''}
           </span>
+        )}
+        {foreignNumberLabel(contact.phone) && (
+          <span className="badge nt" style={{ height: 22 }}>{foreignNumberLabel(contact.phone)}</span>
         )}
       </div>
 

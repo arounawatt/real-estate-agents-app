@@ -4,7 +4,7 @@ import { AgentHero } from '@/components/AgentHero'
 import { Pager } from '@/components/Pager'
 import { AGENTS } from '@/lib/agents'
 import { INTENT_LABELS, PROPERTY_TYPE_LABELS, TIMELINE_LABELS } from '@/lib/labels'
-import { isForeignNumber } from '@/lib/phone'
+import { foreignNumberLabel } from '@/lib/phone'
 import { getSession } from '@/lib/session'
 import { hostOf } from '@/lib/url'
 
@@ -93,7 +93,8 @@ export default async function LeadsPage({
             <div className="row-top">
               <span className="row-name">
                 {contact.fullName ?? contact.phone}
-                {isForeignNumber(contact.phone) && <span className="badge dia" style={{ marginLeft: 8 }}>Diaspora</span>}
+                {contact.residence === 'abroad' && <span className="badge dia" style={{ marginLeft: 8 }}>Diaspora</span>}
+                      {foreignNumberLabel(contact.phone) && <span className="badge nt" style={{ marginLeft: 8 }}>{foreignNumberLabel(contact.phone)}</span>}
               </span>
               <span className="row-time">
                 {new Date(lead.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}

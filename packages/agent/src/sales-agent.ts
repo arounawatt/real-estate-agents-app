@@ -10,7 +10,7 @@
  */
 import {
   createEscalation, createVisitRequestRow, getProperty, searchPublishedProperties,
-  updateLeadQualification, type LeadQualificationInput,
+  updateContactResidence, updateLeadQualification, type LeadQualificationInput,
 } from '@codaya/db'
 import { readAgencyInfo } from './agency.js'
 import { runAgentLoop, type AgentTurnResult } from './agent-loop.js'
@@ -35,8 +35,10 @@ interface TenantContext {
 }
 
 interface ContactContext {
+  id: string
   fullName: string | null
   declaredCity: string | null
+  residence: string
 }
 
 interface LeadContext {
@@ -89,6 +91,8 @@ function buildSystemPrompt(
   const knownContact = [
     contact.fullName ? `Nom déclaré : ${contact.fullName}.` : null,
     contact.declaredCity ? `Ville déclarée : ${contact.declaredCity}.` : null,
+    contact.residence === 'abroad' ? 'A dit vivre hors du Sénégal.' : null,
+    contact.residence === 'senegal' ? 'A dit vivre au Sénégal.' : null,
   ].filter(Boolean).join(' ')
   const knownLead = describeLead(lead)
 
@@ -153,7 +157,7 @@ function isValidUuid(value: unknown): value is string {
 async function executeTool(
   name: string,
   input: Record<string, unknown>,
-  ctx: { tenantId: string; conversationId: string; leadId: string; tenant: TenantContext },
+  ctx: { tenantId: string; conversationId: string; leadId: string; contactId: string; tenant: TenantContext },
 ): Promise<unknown> {
   switch (name) {
     case 'save_qualification': {
@@ -167,6 +171,12 @@ async function executeTool(
       if (typeof input.timeline === 'string') patch.timeline = input.timeline as LeadQualificationInput['timeline']
       if (typeof input.notes === 'string') patch.notes = input.notes
       await updateLeadQualification(ctx.tenantId, ctx.leadId, patch)
+      await updateContactResidence(ctx.tenantId, ctx.contactId, {
+        residence: typeof input.residence === 'string'
+          ? input.residence as 'senegal' | 'abroad' | 'to_qualify'
+          : undefined,
+        declaredCity: typeof input.declared_city === 'string' ? input.declared_city : undefined,
+      })
       return { ok: true }
     }
 
@@ -248,6 +258,7 @@ export async function runSalesTurn(params: SalesTurnInput): Promise<SalesTurnRes
     tenantId: params.tenant.id,
     conversationId: params.conversationId,
     leadId: params.leadId,
+    contactId: params.contact.id,
     tenant: params.tenant,
   }
   return runAgentLoop({
