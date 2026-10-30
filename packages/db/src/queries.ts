@@ -21,7 +21,7 @@
  * travers des outils à paramètres fermés.
  */
 
-import { and, desc, eq, gte, ilike, inArray, isNull, lte, ne, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, ilike, inArray, isNull, lte, ne, or, sql } from 'drizzle-orm'
 import { db } from './client.js'
 import {
   agencyUsers, contacts, conversations, leads, listingImportJobs, messageMedia, messages, properties, tenantLogos,
@@ -167,7 +167,12 @@ export async function searchPublishedProperties(tenantId: TenantId, criteria: {
   // fiche dit « Cité Keur Gorgui » — l'égalité stricte a fait répondre à
   // Coumba qu'il n'y avait rien, devant un prospect, sur deux biens publiés.
   if (criteria.city) conds.push(ilike(properties.city, containsPattern(criteria.city)))
-  if (criteria.district) conds.push(ilike(properties.district, containsPattern(criteria.district)))
+  // Le titre aussi : « F4 meublé Ngor cité Socabec » est classé Almadies, et
+  // une recherche « Ngor » ne le trouvait pas alors que l'annonce le nomme.
+  if (criteria.district) {
+    const pattern = containsPattern(criteria.district)
+    conds.push(or(ilike(properties.district, pattern), ilike(properties.title, pattern))!)
+  }
   // Tolérance de 20 % au-dessus du budget annoncé : un bien légèrement plus
   // cher reste une option à proposer honnêtement (avec son vrai prix), plutôt
   // que de renvoyer « rien trouvé » et pousser le modèle à improviser un chiffre.

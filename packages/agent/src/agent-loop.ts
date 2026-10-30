@@ -100,6 +100,13 @@ export async function runAgentLoop(params: AgentLoopInput): Promise<AgentTurnRes
   /** Réponse d'origine avant une relance de checkFinal, et la longueur de la
    *  trace à laquelle revenir si la relance ne produit aucun appel d'outil. */
   let preNudge: { text: string; length: number } | null = null
+  /** Texte écrit EN MÊME TEMPS qu'un appel d'outil (« Quel est votre budget ? »
+   *  + save_qualification). Le modèle considère alors avoir déjà répondu et
+   *  renvoie souvent un tour final vide : sans ce texte gardé de côté, sa
+   *  question était jetée et remplacée par le message de repli + une escalade
+   *  — vu en production, deux fois dans la même conversation, sur un prospect
+   *  qui ne faisait que répondre aux questions de qualification. */
+  let textWithTools = ''
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const res = await anthropic.messages.create({
@@ -111,9 +118,12 @@ export async function runAgentLoop(params: AgentLoopInput): Promise<AgentTurnRes
     })
 
     const toolUses = res.content.filter((b) => b.type === 'tool_use')
-    const text = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+    const roundText = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+    const isFinal = toolUses.length === 0 || res.stop_reason !== 'tool_use'
+    if (!isFinal && roundText) textWithTools = roundText
+    const text = roundText || (isFinal ? textWithTools : '')
 
-    if (toolUses.length === 0 || res.stop_reason !== 'tool_use') {
+    if (isFinal) {
       // La relance de checkFinal n'a servi à rien (aucun outil appelé) : on
       // revient à la réponse d'origine. La nouvelle réponse est jetée — elle
       // risquerait de commenter la consigne interne devant le client

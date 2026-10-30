@@ -126,6 +126,20 @@ function buildSystemPrompt(
     + "de mémoire ou d'invention. Si l'outil ne renvoie rien, dis-le simplement. "
     + "Un prospect nomme presque toujours un QUARTIER (Mermoz, Plateau…) : passe-le en "
     + 'district, pas en city — city est la ville elle-même (Dakar), rarement ce que dit le client.',
+    "TON TRAVAIL EST D'ARRIVER À UN BIEN, pas de transmettre la demande. Dès que tu connais "
+    + "le type de transaction et une zone ou un budget, appelle search_properties AVANT de "
+    + "répondre — à chaque nouveau critère, tu relances la recherche. Ne passe à "
+    + "search_properties QUE des critères que la personne a dits : achat ou location non "
+    + "précisé → pas de transaction, et ne lui attribue jamais un choix qu'elle n'a pas fait.",
+    "Quand search_properties renvoie outside_requested_district, ce sont des biens qui "
+    + "répondent à tout sauf au quartier : présente-les en le disant honnêtement (« rien à Ngor, "
+    + "mais à Point E, 900 000 XOF/mois »). Ne demande à la personne d'assouplir un critère "
+    + "que si cette liste est vide aussi.",
+    "Tu n'annonces JAMAIS qu'un conseiller va rappeler ou que la demande est transmise, sauf "
+    + "dans trois cas : offer_visit a renvoyé \"callback\", tu as appelé escalate_to_human "
+    + "(zone rouge), ou la personne demande elle-même à parler à quelqu'un. Même si l'historique "
+    + "contient déjà un tel message, la conversation n'est pas finie : continue de qualifier et "
+    + "de chercher.",
     "Quand tu détailles un bien précis (get_property) et que listing_url existe, "
     + "partage-le systématiquement à la fin, genre « Tu as plus de détails et des photos sur "
     + "l'annonce ici : [lien] ». Jamais de lien si listing_url est vide.",
@@ -181,18 +195,27 @@ async function executeTool(
     }
 
     case 'search_properties': {
-      const rows = await searchPublishedProperties(ctx.tenantId, {
+      const criteria = {
         transaction: input.transaction as 'sale' | 'long_term_rental' | 'short_term_rental' | undefined,
         type: input.type as 'apartment' | 'villa' | 'land' | 'commercial' | undefined,
         city: input.city as string | undefined,
         district: input.district as string | undefined,
         maxPrice: input.max_price as number | undefined,
-      })
+      }
+      const summarize = (rows: Awaited<ReturnType<typeof searchPublishedProperties>>) => rows.map((p) => ({
+        id: p.id, title: p.title, city: p.city, district: p.district, typology: knownOrNull(p.typology),
+        price: p.price, rent_period: knownOrNull(p.rentPeriod), transaction: p.transaction, type: p.type,
+      }))
+      const rows = await searchPublishedProperties(ctx.tenantId, criteria)
+      if (rows.length > 0 || !criteria.district) return { properties: summarize(rows) }
+      // Rien dans le quartier : on élargit ici, en code, plutôt que de compter
+      // sur le prompt — en test, Coumba tantôt élargissait, tantôt s'arrêtait
+      // sur « je n'ai rien », alors que le catalogue avait des biens à 50 000
+      // XOF du budget, deux quartiers plus loin.
+      const nearby = await searchPublishedProperties(ctx.tenantId, { ...criteria, district: undefined })
       return {
-        properties: rows.map((p) => ({
-          id: p.id, title: p.title, city: p.city, district: p.district,
-          price: p.price, rent_period: knownOrNull(p.rentPeriod), transaction: p.transaction, type: p.type,
-        })),
+        properties: [],
+        outside_requested_district: summarize(nearby),
       }
     }
 

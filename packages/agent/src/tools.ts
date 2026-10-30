@@ -70,7 +70,10 @@ export const searchPropertiesTool = {
     'Search the agency catalogue. Only published listings are returned — an ' +
     'unpublished property does not exist for you. A prospect almost always names a ' +
     'NEIGHBOURHOOD (Mermoz, Plateau, Ngor…) — pass that as district, not city. city is ' +
-    'the city itself (Dakar, Saly…), rarely what a prospect actually says.',
+    'the city itself (Dakar, Saly…), rarely what a prospect actually says. ' +
+    'When nothing matches in the district, the same search without the district comes back ' +
+    'as outside_requested_district: present those, saying plainly they are not in the ' +
+    'requested neighbourhood. Pass only criteria the prospect actually stated.',
   input_schema: {
     type: 'object' as const,
     properties: {
